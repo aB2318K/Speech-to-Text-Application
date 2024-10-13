@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div>
-      Welcome to the Speech-To-Text Aplication. Here you can translate your spoken speech to text in real time and export it.
+      Welcome to the Speech-To-Text Aplication. Here you can translate your speech to text in real time and export it.
       <br/>
       Login or Sign-Up to continue
       <br/>

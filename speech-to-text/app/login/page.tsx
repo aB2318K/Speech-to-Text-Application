@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function LogIn() {
     return(
          <div>
@@ -10,6 +12,11 @@ export default function LogIn() {
 
                 <button type="submit">LogIn</button>
             </form>
+            <span><Link href="/reset-password">Forgotten Password?</Link></span>
+
+            <p>
+              Don't have an account? <Link href="/signup">Register here</Link>
+            </p>
 
          </div>
     )
