@@ -2,89 +2,180 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SignUp() {
     const router = useRouter();
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [firstNameError, setFirstNameError] = useState('');
+    const [lastNameError, setLastNameError] = useState('')
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    const emailValidator = (event: React.MouseEvent) => {
-        event.preventDefault(); 
+    const fieldValidator = (name: string, setError: React.Dispatch<React.SetStateAction<string>>) => {
+        if (name.trim().length === 0) { 
+            setError('*This field is required');
+            return false;
+        } else {
+            setError('');
+            return true;
+        }
+    };
+
+    const emailValidator = () => {
         const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
         if (!emailRegex.test(email)) {
-            setEmailError('Please provide a valid email address in the format: example@domain.com.');
+            setEmailError('*Please provide a valid email address in the format: example@domain.com');
             return false;
         } else {
             setEmailError('');
             return true;
         }
-    }
+    };
 
-    const passwordValidator = (event: React.MouseEvent) => {
-        event.preventDefault();
+    const passwordValidator = () => {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         if (!passwordRegex.test(password)) {
             setPasswordError(
-                'Your password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character.'
+                '*Your password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character'
             );
             return false;
         } else {
             setPasswordError('');
             return true;
         }
-    }
+    };
 
     const handleSubmission = (event: React.MouseEvent) => {
         event.preventDefault();
-        emailValidator(event);
-        passwordValidator(event);
-        if(emailValidator(event) && passwordValidator(event)) {
+        setPasswordError('');
+        setEmailError('');
+        setFirstNameError('');
+        setLastNameError('');
+
+        const isEmailValid = emailValidator();
+        const isPasswordValid = passwordValidator();
+        const isFirstNameValid = fieldValidator(firstName, setFirstNameError);
+        const isLastNameValid = fieldValidator(lastName, setLastNameError);
+
+        if (isEmailValid && isPasswordValid && isFirstNameValid && isLastNameValid) {
+            //Before creating the account check if the email is already used
+            /*if the email is already in database{
+                display a message saying email already used
+            } */
             setSuccessMessage('You have successfully created an account. Redirecting to Log In page');
 
             setTimeout(() => {
                 router.push('/login'); // Redirect to login page
-            }, 2000); 
+            }, 3000); 
         }
-        setEmail('');
-        setPassword('');
-    }
+    };
 
     return (
-        <div>
-            <form action="/submit" method="post">
-                <label htmlFor="email">Email:</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                {emailError && <p>{emailError}</p>}
+        <div className="min-h-screen flex items-center justify-center bg-teal-50"> 
+            <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+                <h2 className="text-3xl font-semibold text-center mb-6 text-teal-700">
+                    Sign Up
+                </h2>
+                <form action="/submit" method="post" className="space-y-5">
+                <div>
+                    <label 
+                        htmlFor="first_name"
+                        className="block text-sm font-medium text-teal-800"
+                    >
+                        First Name: {firstNameError && <p className="error_message text-red-700 text-[10px] inline-block">{firstNameError}</p>}
+                    </label>
+                    <input
+                        type="text"
+                        id="first_name"
+                        name="first_name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)} 
+                        placeholder="Enter your first name"
+                        maxLength={50}
+                        required
+                        className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    />
+                </div>
+                <div>
+                    <label 
+                        htmlFor="last_name"
+                        className="block text-sm font-medium text-teal-800"
+                    >
+                        Last Name:  {lastNameError && <p className="error_message text-red-700 text-[10px] inline-block">{lastNameError}</p>}
+                    </label>
+                    
+                    <input
+                        type="text"
+                        id="last_name"
+                        name="last_name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Enter your last name"
+                        maxLength={50}
+                        required
+                        className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    />
+                </div>
+                <div>
+                    <label 
+                        htmlFor="email"
+                        className="block text-sm font-medium text-teal-800"
+                    >
+                        Email:
+                    </label>
+                    {emailError && <p className="error_message text-red-700 text-[10px]">{emailError}</p>}
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    />
+                </div>
 
-                <label htmlFor="password">Password:</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    pattern='(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                {passwordError && <p>{passwordError}</p>}
-
-                <button type="submit" onClick={(e) => {handleSubmission(e)}}>
+                <div>
+                    <label 
+                        htmlFor="password"
+                        className="block text-sm font-medium text-teal-800"
+                    >
+                        Password:
+                    </label>
+                    {passwordError && <p className="error_message text-red-700 text-[10px]">{passwordError}</p>}
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"                       
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    />
+                </div>
+                <button 
+                    type="submit"
+                    onClick={(e) => {handleSubmission(e)}}
+                    className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
                     Sign Up
                 </button>
-                {successMessage}
+                {!successMessage && <p className="mt-4 text-center text-sm text-teal-800">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-teal-600 hover:underline">
+                        Log in here
+                    </Link>
+                </p>}
+                {successMessage && <p className="success_message bg-teal-100 text-teal-600 text-center mt-4 rounded-md">{successMessage}</p>}
             </form>
+            </div>
         </div>
     );
 }

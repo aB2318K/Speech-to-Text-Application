@@ -11,8 +11,8 @@ describe('login_page_test', () => {
 
     it('should not log in with empty credentials', () => {
         cy.get('button[type="submit"]').click();
-      
-        cy.get('input:invalid').should('have.length', 2); // the two fields email and password are required
+        cy.get('.empty_error').should('be.visible').and('have.length', 2);
+        cy.url().should('include', '/login');
     })
 
     it('should navigate to forgotten password page', () => {
