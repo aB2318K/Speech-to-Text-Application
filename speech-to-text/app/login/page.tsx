@@ -49,7 +49,7 @@ export default function LogIn() {
                             htmlFor="email"
                             className="block text-sm font-medium text-teal-800"
                         >
-                            Email: {emailError && <p className="empty_error text-red-700 text-[10px] inline-block">{emailError}</p>}
+                            Email:
                         </label>
                         <input
                             type="email"
@@ -60,13 +60,14 @@ export default function LogIn() {
                             placeholder="Enter your email"
                             className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                         />
+                        {emailError && <p className="empty_error text-red-700 text-[10px] inline-block">{emailError}</p>}
                     </div>
                     <div>
                         <label
                             htmlFor="password"
                             className="block text-sm font-medium text-teal-800"
                         >
-                            Password: {passwordError && <p className="empty_error text-red-700 text-[10px] inline-block">{passwordError}</p>}
+                            Password: 
                         </label>
                         <input
                             type="password"
@@ -76,7 +77,8 @@ export default function LogIn() {
                             name="password"
                             placeholder="Enter your password"
                             className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                        />                       
+                        />
+                        {passwordError && <p className="empty_error text-red-700 text-[10px] inline-block">{passwordError}</p>}                       
                     </div>
                     <button
                         type="submit"

@@ -87,7 +87,7 @@ export default function SignUp() {
                         htmlFor="first_name"
                         className="block text-sm font-medium text-teal-800"
                     >
-                        First Name: {firstNameError && <p className="error_message text-red-700 text-[10px] inline-block">{firstNameError}</p>}
+                        First Name:
                     </label>
                     <input
                         type="text"
@@ -100,13 +100,14 @@ export default function SignUp() {
                         required
                         className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
+                    {firstNameError && <p className="error_message text-red-700 text-[10px] inline-block">{firstNameError}</p>}
                 </div>
                 <div>
                     <label 
                         htmlFor="last_name"
                         className="block text-sm font-medium text-teal-800"
                     >
-                        Last Name:  {lastNameError && <p className="error_message text-red-700 text-[10px] inline-block">{lastNameError}</p>}
+                        Last Name:  
                     </label>
                     
                     <input
@@ -120,6 +121,7 @@ export default function SignUp() {
                         required
                         className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
+                    {lastNameError && <p className="error_message text-red-700 text-[10px] inline-block">{lastNameError}</p>}
                 </div>
                 <div>
                     <label 
@@ -128,7 +130,6 @@ export default function SignUp() {
                     >
                         Email:
                     </label>
-                    {emailError && <p className="error_message text-red-700 text-[10px]">{emailError}</p>}
                     <input
                         type="email"
                         id="email"
@@ -139,6 +140,7 @@ export default function SignUp() {
                         required
                         className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
+                    {emailError && <p className="error_message text-red-700 text-[10px]">{emailError}</p>}
                 </div>
 
                 <div>
@@ -148,7 +150,6 @@ export default function SignUp() {
                     >
                         Password:
                     </label>
-                    {passwordError && <p className="error_message text-red-700 text-[10px]">{passwordError}</p>}
                     <input
                         type="password"
                         id="password"
@@ -159,6 +160,7 @@ export default function SignUp() {
                         required
                         className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
+                    {passwordError && <p className="error_message text-red-700 text-[10px]">{passwordError}</p>}
                 </div>
                 <button 
                     type="submit"
