@@ -7,7 +7,7 @@ export default function Home() {
         <h1 className="text-4xl font-semibold text-center text-teal-700 mb-6">
           Speech to Text Application
         </h1>
-        <p className="text-center text-teal-600 text-lg mb-8">
+        <p className="text-center text-teal-800 text-lg mb-8">
           Effortlessly convert your speech to text with our advanced speech recognition software.
         </p>
 
