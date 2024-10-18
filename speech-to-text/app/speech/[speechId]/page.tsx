@@ -55,6 +55,10 @@ export default function Speech() {
     const [editableTitle, setEditableTitle] = useState(speechTitle);
     const [editableData, setEditableData] = useState(speechData);
 
+    const isTitleChanged = editableTitle !== speechTitle;
+    const isDataChanged = editableData !== speechData;
+
+    //Right now handle save is only changing the state, but it should save the changes in the database later
     const handleSave = () => {
         setSpeechTitle(editableTitle); 
         setSpeechData(editableData);
@@ -86,7 +90,14 @@ export default function Speech() {
             />
             <button 
                 onClick={handleSave}
-                className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mt-5">
+                disabled={!isTitleChanged && !isDataChanged} 
+                className={`w-full py-3 px-4 rounded-md mt-5         
+                    ${
+                    (!isTitleChanged && !isDataChanged 
+                        ? 'bg-teal-100 text-gray-600' // Light color for disabled state
+                        : 'bg-teal-600 hover:bg-teal-700 text-white'
+                    )
+                    } focus:outline-none focus:ring-2 focus:ring-teal-500`}>
               Save
             </button>
             <button className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mt-5">
