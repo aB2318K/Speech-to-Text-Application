@@ -1,6 +1,7 @@
 'use client';
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 //This is just an example of users and their saved speeches; use database later
 interface Speech {
@@ -45,6 +46,7 @@ interface Speech {
 
 export default function Speech() {
     const params = useParams();
+    const router = useRouter();
     //Extracting userId from speechId assuming the first digit is the userId
     //This is just an example, the user and speech detail is meant to be retrieved from the database
     const userId = parseInt(params.speechId[0] as string); // Convert userId to a number
@@ -54,6 +56,7 @@ export default function Speech() {
     const [speechData, setSpeechData] = useState(speech?.data);
     const [editableTitle, setEditableTitle] = useState(speechTitle);
     const [editableData, setEditableData] = useState(speechData);
+    const [modalOpened, setModalOpened] = useState(false);
 
     const isTitleChanged = editableTitle !== speechTitle;
     const isDataChanged = editableData !== speechData;
@@ -63,6 +66,32 @@ export default function Speech() {
         setSpeechTitle(editableTitle); 
         setSpeechData(editableData);
     };
+
+    const handleDelete = () => {
+      //Later write the logic to delete from the database
+      setModalOpened(false);
+      router.push(`/dashboard/${userId}`)
+    }
+
+    const deleteModal = (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="bg-white p-5 rounded-lg shadow-xl">
+          <h3 className=" text-teal-1000 text-lg mb-4">Are you sure you want to delete this speech?</h3>
+          <div className="flex justify-end">
+            <button 
+              onClick={() => setModalOpened(false)} // Close modal on cancel
+              className="bg-teal-600 text-white  px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mr-2">
+              Cancel
+            </button>
+            <button 
+              onClick={handleDelete} 
+              className="bg-teal-600 text-white  px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    );
 
     return(
         <div className="min-h-screen flex items-center justify-center bg-teal-50">
@@ -94,7 +123,7 @@ export default function Speech() {
                 className={`w-full py-3 px-4 rounded-md mt-5         
                     ${
                     (!isTitleChanged && !isDataChanged 
-                        ? 'bg-teal-100 text-gray-600' // Light color for disabled state
+                        ? 'bg-teal-100 text-gray-600' 
                         : 'bg-teal-600 hover:bg-teal-700 text-white'
                     )
                     } focus:outline-none focus:ring-2 focus:ring-teal-500`}>
@@ -103,9 +132,12 @@ export default function Speech() {
             <button className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mt-5">
               Export
             </button>
-            <button className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mt-5">
+            <button
+              onClick={() => setModalOpened(true)}
+              className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mt-5">
               Delete
             </button>
+            {modalOpened && deleteModal}
           </div>
         </div>
       );
