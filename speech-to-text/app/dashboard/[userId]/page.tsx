@@ -61,17 +61,48 @@ export default function Dashboard() {
   const [userSpeeches] = useState(() => getUserSpeeches(userId)); 
 
   return (
-    <div className="h-screen flex items-center justify-center bg-teal-50">
-      <div className="h-auto w-full max-w-lg bg-white p-10 rounded-lg shadow-2xl">
+    <div className="flex h-screen bg-teal-50">
+      {/* Sidebar */}
+      <div className="w-1/6 bg-white text-black p-4 rounded-lg shadow-lg text-center">
+        <p className="text-sm font-semibold mb-4 text-teal-800">Speech to Text Application</p>
+        <ul className="space-y-2">
+          <li>
+            <Link href="/create">
+              <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
+                Create New
+              </button>
+            </Link>
+          </li>
+          <li>
+            <Link href="/collaborate">
+              <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
+                Collaborate
+              </button>
+            </Link>
+          </li>
+          <li>
+            <Link href="/login">
+              <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                Log Out
+              </button>
+            </Link>
+          </li>
+        </ul>
+      </div>
+  
+      {/* Main Content Area */}
+      <div className="flex-1 p-8">
         <h2 className="text-3xl font-semibold text-center text-teal-700 mb-6">
           Saved Speeches
         </h2>
         {userSpeeches.length > 0 ? (
           <ul className="space-y-4">
             {userSpeeches.map((speech, index: number) => (
-                <li key={index} className="p-0 bg-teal-50 rounded-md text-teal-900 hover:bg-teal-100 transition duration-200 ease-in-out">
-                  <Link href={`/speech/${speech.id}`} className="block w-full h-full p-3">{speech.title}</Link>
-                </li>              
+              <Link href={`/speech/${speech.id}`} className="block">
+              <li key={index} className="p-3 bg-white rounded-md text-teal-900 hover:bg-teal-100 transition duration-200 ease-in-out shadow-md">
+                {speech.title}
+              </li>
+              </Link>
             ))}
           </ul>
         ) : (
@@ -79,15 +110,10 @@ export default function Dashboard() {
             You don't have any saved speeches at the moment.
           </div>
         )}
-        <div>
+        <div className="mt-10 flex justify-center">
           <Link href="/create">
-            <button className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4 mt-5">
+            <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4">
               Create New
-            </button>
-          </Link>
-          <Link href="/collaborate">
-            <button className="w-full py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-              Collaborate
             </button>
           </Link>
         </div>
