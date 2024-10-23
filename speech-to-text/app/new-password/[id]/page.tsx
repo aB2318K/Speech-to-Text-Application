@@ -72,7 +72,7 @@ export default function NewPassword() {
                             placeholder="Enter your password"
                             className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                         />
-                        {passwordError && <p className="empty_error text-red-700 text-[10px] inline-block">{passwordError}</p>}
+                        {passwordError && <p className="error_message text-red-700 text-[10px] inline-block">{passwordError}</p>}
                     </div>
                     <div>
                         <label
