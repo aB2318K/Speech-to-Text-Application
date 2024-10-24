@@ -92,7 +92,7 @@ export default function Dashboard() {
   
       {/* Main Content Area */}
       <div className="flex-1 p-8">
-        <h2 className="text-3xl font-semibold text-center text-teal-700 mb-6">
+        <h2 className="text-2xl font-semibold text-center text-teal-700 mb-6">
           Saved Speeches
         </h2>
         {userSpeeches.length > 0 ? (
