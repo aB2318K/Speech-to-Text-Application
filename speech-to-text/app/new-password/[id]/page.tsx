@@ -1,5 +1,5 @@
 'use client';
-
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -98,6 +98,12 @@ export default function NewPassword() {
                         Update Password
                     </button>
                     {successMessage && <p className="success_message bg-teal-100 text-teal-600 text-center mt-4 rounded-md">{successMessage}</p>}
+                    {!successMessage && 
+                    <p className="mt-4 text-center text-sm text-teal-800">
+                        <Link href="/login" className="text-teal-600 hover:underline">
+                            Back to log in
+                        </Link>
+                    </p>}
                 </form>
             </div>
         </div>

@@ -30,5 +30,10 @@ describe('login_page_test', () => {
         cy.url().should('include', '/login');
     })
 
+    it('Should navigate to log in page when log in link is clicked', () => {
+        cy.get('a[href="/login"]').click();
+      
+        cy.url().should('include', '/login');
+    })
 } )
 
