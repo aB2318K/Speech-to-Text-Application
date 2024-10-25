@@ -31,31 +31,52 @@ const users: { [key: number]: User } = {
 export default function Speech() {
   const params = useParams();
   const router = useRouter();
-  //Extracting userId from speechId assuming the first digit is the userId
-  //This is just an example, the user and speech detail is meant to be retrieved from the database
-  const userId = parseInt(params.speechId[0] as string); // Convert userId to a number
+  const userId = parseInt(params.speechId[0] as string);
   const speechId = params.speechId as string;
   const speech = users[userId].speeches.find((speech) => speech.id === speechId);
-  const[speechTitle, setSpeechTitle] = useState(speech?.title);
-  const [speechData, setSpeechData] = useState(speech?.data);
-  const [editableTitle, setEditableTitle] = useState(speechTitle);
-  const [editableData, setEditableData] = useState(speechData);
-  const [modalOpened, setModalOpened] = useState(false);
-
+  const [speechTitle, setSpeechTitle] = useState(speech?.title || "");
+  const [speechData, setSpeechData] = useState(speech?.data || "");
+  const [editableTitle, setEditableTitle] = useState(speech?.title || "");
+  const [editableData, setEditableData] = useState(speech?.data || "");
+  const [delModalOpened, setDelModalOpened] = useState(false);
+  const [exportModalOpened, setExportModalOpened] = useState(false);
   const isTitleChanged = editableTitle !== speechTitle;
   const isDataChanged = editableData !== speechData;
+  const isDataEmpty = editableData.trim().length === 0;
+  const isTitleEmpty = editableTitle.trim().length === 0;
 
-  //Right now handle save is only changing the state, but it should save the changes in the database later
   const handleSave = () => {
-      setSpeechTitle(editableTitle); 
-      setSpeechData(editableData);
+    setSpeechTitle(editableTitle);
+    setSpeechData(editableData);
   };
 
   const handleDelete = () => {
-    //Later write the logic to delete from the database
-    setModalOpened(false);
-    router.push(`/dashboard/${userId}`)
-  }
+    setDelModalOpened(false);
+    router.push(`/dashboard/${userId}`);
+  };
+
+  const handleExportTxt = () => {
+    const blob = new Blob([editableData], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${editableTitle}.txt`; 
+    link.click();
+    URL.revokeObjectURL(url); // Clean up the URL object after use
+    setExportModalOpened(false); // Close the export modal
+  };
+
+  const handleExportCsv = () => {
+    const csvData = `"Title","Data"\n"${editableTitle}","${editableData}"`; // Format as CSV
+    const blob = new Blob([csvData], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${editableTitle}.csv`; 
+    link.click();
+    URL.revokeObjectURL(url); // Clean up the URL object after use
+    setExportModalOpened(false); // Close the export modal
+  };
 
   const deleteModal = (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -63,7 +84,7 @@ export default function Speech() {
         <h3 className="text-teal-1000 text-lg mb-4">Are you sure you want to delete this speech?</h3>
         <div className="flex justify-end">
           <button
-            onClick={() => setModalOpened(false)}
+            onClick={() => setDelModalOpened(false)}
             className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mr-2"
           >
             Cancel
@@ -73,6 +94,34 @@ export default function Speech() {
             className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const exportModal = (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white p-5 rounded-lg shadow-xl">
+        <h3 className="text-teal-1000 text-lg mb-4">Export as a file</h3>
+        <div className="flex justify-between space-x-2">
+          <button
+            onClick={handleExportTxt}
+            className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          >
+            Export as .txt
+          </button>
+          <button
+            onClick={handleExportCsv}
+            className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          >
+            Export as .csv
+          </button>
+          <button
+            onClick={() => setExportModalOpened(false)}
+            className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mr-2"
+          >
+            Cancel
           </button>
         </div>
       </div>
@@ -103,6 +152,13 @@ export default function Speech() {
             <Link href="/collaborate">
               <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
                 Collaborate
+              </button>
+            </Link>
+          </li>
+          <li>
+            <Link href="/new-password/0">
+              <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
+                Change Password
               </button>
             </Link>
           </li>
@@ -139,9 +195,9 @@ export default function Speech() {
         <div className="flex justify-evenly mt-5">
           <button
             onClick={handleSave}
-            disabled={!isTitleChanged && !isDataChanged}
+            disabled={isTitleEmpty || isDataEmpty || (!isTitleChanged && !isDataChanged)}
             className={`w-1/4 py-3 px-4 rounded-md
-              ${!isTitleChanged && !isDataChanged
+              ${isTitleEmpty || isDataEmpty || (!isTitleChanged && !isDataChanged)
                 ? 'bg-teal-100 text-gray-600'
                 : 'bg-teal-600 hover:bg-teal-700 text-white'}
               focus:outline-none focus:ring-2 focus:ring-teal-500`}
@@ -149,15 +205,20 @@ export default function Speech() {
             Save
           </button>
           <button
-            onClick={() => setModalOpened(true)}
+            onClick={() => setDelModalOpened(true)}
             className="w-1/4 py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             Delete
           </button>
-          {modalOpened && deleteModal}
-          <button className="w-1/4 py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+          {delModalOpened && deleteModal}
+          <button
+            onClick={() => setExportModalOpened(true)}
+            disabled={isDataEmpty}
+            className={`w-1/4 py-3 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 ${isDataEmpty ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
             Export
           </button>
+          {exportModalOpened && exportModal}
         </div>
       </div>
     </div>

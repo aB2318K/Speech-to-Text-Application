@@ -4,14 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 
-//This is just an example of users and their saved speeches; use database later
+// This is just an example of users and their saved speeches; use database later
 interface Speech {
-  title: string,
-  data: string
-}
-
-interface Speech {
-  id: string
+  id: string;
   title: string;
   data: string;
 }
@@ -48,7 +43,7 @@ const users: { [key: number]: User } = {
 export default function Dashboard() {
   const params = useParams();
   const userId = parseInt(params.userId as string); // Convert userId to a number
-  
+
   // Function to get user speeches
   const getUserSpeeches = (userId: number): Speech[] => {
     if (userId in users) {
@@ -56,9 +51,9 @@ export default function Dashboard() {
     }
     return []; // Return an empty array if userId is not found
   };
-  
+
   // Get speeches based on userId
-  const [userSpeeches] = useState(() => getUserSpeeches(userId)); 
+  const [userSpeeches] = useState(() => getUserSpeeches(userId));
 
   return (
     <div className="flex h-screen bg-teal-50">
@@ -81,6 +76,13 @@ export default function Dashboard() {
             </Link>
           </li>
           <li>
+            <Link href="/new-password/0">
+              <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
+                Change Password
+              </button>
+            </Link>
+          </li>
+          <li>
             <Link href="/login">
               <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                 Log Out
@@ -97,17 +99,17 @@ export default function Dashboard() {
         </h2>
         {userSpeeches.length > 0 ? (
           <ul className="space-y-4">
-            {userSpeeches.map((speech, index: number) => (
-              <Link href={`/speech/${speech.id}`} className="block">
-              <li key={index} className="p-3 bg-white rounded-md text-teal-900 hover:bg-teal-100 transition duration-200 ease-in-out shadow-md">
-                {speech.title}
-              </li>
+            {userSpeeches.map((speech) => (
+              <Link key={speech.id} href={`/speech/${speech.id}`} className="block">
+                <li className="p-3 bg-white rounded-md text-teal-900 hover:bg-teal-100 transition duration-200 ease-in-out shadow-md">
+                  {speech.title}
+                </li>
               </Link>
             ))}
           </ul>
         ) : (
           <div className="block text-sm font-medium text-teal-800 text-center">
-            You don't have any saved speeches at the moment.
+            You don&apos;t have any saved speeches at the moment.
           </div>
         )}
         <div className="mt-10 flex justify-center">
