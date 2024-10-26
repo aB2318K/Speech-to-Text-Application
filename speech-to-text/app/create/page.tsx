@@ -74,7 +74,7 @@ export default function Create() {
       };
 
     const deleteModal = (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="delete_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white p-5 rounded-lg shadow-xl">
                 <h3 className="text-teal-1000 text-lg mb-4">Are you sure you want to delete this speech?</h3>
                 <div className="flex justify-end">
@@ -85,7 +85,7 @@ export default function Create() {
                     </button>
                     <button
                         onClick={handleDelete}
-                        className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        className="confirm_delete bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                         Delete
                     </button>
                 </div>
@@ -94,7 +94,7 @@ export default function Create() {
     );
 
     const saveModal = (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="save_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white p-5 rounded-lg shadow-lg w-1/4">
                 <h3 className="text-lg mb-2 text-teal-1000">Save Your Speech</h3> 
                 <input
@@ -115,7 +115,7 @@ export default function Create() {
                     <button
                         disabled={speechTitle.trim().length === 0}
                         onClick={handleSave} // Redirects on save
-                        className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        className="confirm_save bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                         Save
                     </button>
                 </div>
@@ -124,7 +124,7 @@ export default function Create() {
     );
 
     const exportModal = (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="export_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-5 rounded-lg shadow-xl">
             <h3 className="text-teal-1000 text-lg mb-4">Export as a file</h3>
             <div className="flex justify-between space-x-2">
@@ -154,7 +154,7 @@ export default function Create() {
     return (
         <div className="flex h-screen bg-teal-50">
             {/* Sidebar */}
-            <div className="w-1/6 bg-white text-black p-4 rounded-lg shadow-lg ">
+            <div className="side_bar w-1/6 bg-white text-black p-4 rounded-lg shadow-lg ">
                 <p className="text-sm font-semibold mb-4 text-teal-800 text-center">Speech to Text Application</p>
                 <ul className="space-y-2">
                     <li>
@@ -203,7 +203,7 @@ export default function Create() {
                 <div className="flex justify-evenly">
                     <button
                         disabled={sessionEnd} // Disable when session has ended
-                        className={`w-1/4 py-3 px-4 rounded-md mt-5
+                        className={`start_button w-1/4 py-3 px-4 rounded-md mt-5
                             ${sessionEnd
                                 ? 'bg-teal-100 text-gray-600' // Disabled style when session ends
                                 : isListening
@@ -217,7 +217,7 @@ export default function Create() {
                     </button>
                     <button
                         disabled={!isListening} // Only enabled when listening
-                        className={`w-1/4 py-3 px-4 rounded-md mt-5         
+                        className={`controller w-1/4 py-3 px-4 rounded-md mt-5         
                             ${(!isListening
                                 ? 'bg-teal-100 text-gray-600'
                                 : 'bg-teal-600 hover:bg-teal-700 text-white'
@@ -225,7 +225,7 @@ export default function Create() {
                             focus:outline-none focus:ring-2 focus:ring-teal-500`}
                         onClick={handlePlayPauseClick}
                     >
-                        {isPaused ? 'Play' : 'Pause'}
+                        {isPaused ? 'Resume' : 'Pause'}
                     </button>
                     <button
                         disabled={!sessionEnd} // Disabled if session has not ended
@@ -245,7 +245,7 @@ export default function Create() {
                     <button
                         onClick={() => setSaveModalOpened(true)}
                         disabled={speechData.trim().length === 0 || !sessionEnd} // Disabled if text area is empty or session has not ended
-                        className={`w-1/4 py-3 px-4 rounded-md
+                        className={`save_button w-1/4 py-3 px-4 rounded-md
                             ${speechData.trim().length === 0 || !sessionEnd
                                 ? 'bg-teal-100 text-gray-600' // Disabled style
                                 : 'bg-teal-600 hover:bg-teal-700 text-white'
@@ -271,7 +271,7 @@ export default function Create() {
                     <button
                         onClick={() => setExportModalOpened(true)}
                         disabled={speechData.trim().length === 0 || !sessionEnd} // Disabled if text area is empty or session has not ended
-                        className={`w-1/4 py-3 px-4 rounded-md
+                        className={`export_button w-1/4 py-3 px-4 rounded-md
                             ${speechData.trim().length === 0 || !sessionEnd
                                 ? 'bg-teal-100 text-gray-600' // Disabled style
                                 : 'bg-teal-600 hover:bg-teal-700 text-white'

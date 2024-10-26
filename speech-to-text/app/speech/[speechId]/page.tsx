@@ -79,7 +79,7 @@ export default function Speech() {
   };
 
   const deleteModal = (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="delete_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-5 rounded-lg shadow-xl">
         <h3 className="text-teal-1000 text-lg mb-4">Are you sure you want to delete this speech?</h3>
         <div className="flex justify-end">
@@ -91,7 +91,7 @@ export default function Speech() {
           </button>
           <button
             onClick={handleDelete}
-            className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="confirm_delete bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             Delete
           </button>
@@ -101,7 +101,7 @@ export default function Speech() {
   );
 
   const exportModal = (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="export_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-5 rounded-lg shadow-xl">
         <h3 className="text-teal-1000 text-lg mb-4">Export as a file</h3>
         <div className="flex justify-between space-x-2">
@@ -131,7 +131,7 @@ export default function Speech() {
   return (
     <div className="flex h-screen bg-teal-50">
       {/* Sidebar */}
-      <div className="w-1/6 bg-white text-black p-4 rounded-lg shadow-lg">
+      <div className="side_bar w-1/6 bg-white text-black p-4 rounded-lg shadow-lg">
         <p className="text-sm font-semibold mb-4 text-teal-800 text-center">Speech to Text Application</p>
         <ul className="space-y-2">
           <li>
@@ -178,6 +178,7 @@ export default function Speech() {
           {speechTitle}
         </h2>
         <input
+          id="title"
           type="text"
           placeholder="Enter title"
           value={editableTitle}
