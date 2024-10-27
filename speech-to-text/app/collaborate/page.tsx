@@ -4,6 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
+//This is just an example of invited users
+//You have to write the logic to invite users in real time to collaborate
+const invitedUsers = ['User2', 'User3'];
+
 export default function Collaborate() {
     const router = useRouter();
     const [isListening, setIsListening] = useState(false);
@@ -13,8 +17,15 @@ export default function Collaborate() {
     const [delModalOpened, setDelModalOpened] = useState(false);
     const [saveModalOpened, setSaveModalOpened] = useState(false);
     const [exportModalOpened, setExportModalOpened] = useState(false);
+    const [removeModalOpened, setRemoveModalOpened] = useState(false);
+    const [inviteModalOpened, setInviteModalOpened] = useState(false);
     const [speechData, setspeechData] = useState(""); // State to hold speech text
     const [speechTitle, setSpeechTitle] = useState("");
+    const [collaborators, setCollaborators] = useState(invitedUsers);
+    const [collaboratorToRemove, setCollaboratorToRemove] = useState('');
+    const [iniviteeEmail, setIniviteeEmail] = useState('');
+    const [successInviteMessage, setSuccessInviteMessage] = useState('');
+    const [emailError, setEmailError] = useState('');
     const params = useParams();
     const userId = parseInt(params.userId as string); // Convert userId to a number
 
@@ -73,8 +84,45 @@ export default function Collaborate() {
         setExportModalOpened(false); // Close the export modal
       };
 
+      const handleRemoveCollaborator = () => {
+        setCollaborators((prev) => prev.filter((collaborator) => collaborator !== collaboratorToRemove));
+        setRemoveModalOpened(false);
+    };
+
+    const emailValidator = () => {
+        const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+        if (!emailRegex.test(iniviteeEmail)) {
+            setEmailError('*Please provide a valid email address in the format: example@domain.com');
+            return false;
+        } else {
+            setEmailError('');
+            return true;
+        }
+    };
+
+    const handleInvite = () => {
+        setSuccessInviteMessage('');
+        setEmailError('');
+        const isEmailValid = emailValidator();
+        if(isEmailValid) {
+            /* if (email not found in database) {
+                setErrorMessage('*User not found')
+            } else {
+                handle logic to send the reset link to the user's email
+             }
+                */
+             setSuccessInviteMessage('Invitation link sent'); 
+             setTimeout(() => {
+                setSuccessInviteMessage('');
+                setIniviteeEmail('');
+                setInviteModalOpened(false);
+                setCollaborators((prev) => [...prev, iniviteeEmail]);
+             }, 1000);
+        } 
+    }
+
     const deleteModal = (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="delete_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white p-5 rounded-lg shadow-xl">
                 <h3 className="text-teal-1000 text-lg mb-4">Are you sure you want to delete this speech?</h3>
                 <div className="flex justify-end">
@@ -85,7 +133,7 @@ export default function Collaborate() {
                     </button>
                     <button
                         onClick={handleDelete}
-                        className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        className="confirm_delete bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                         Delete
                     </button>
                 </div>
@@ -94,7 +142,7 @@ export default function Collaborate() {
     );
 
     const saveModal = (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="save_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white p-5 rounded-lg shadow-lg w-1/4">
                 <h3 className="text-lg mb-2 text-teal-1000">Save Your Speech</h3> 
                 <input
@@ -115,7 +163,7 @@ export default function Collaborate() {
                     <button
                         disabled={speechTitle.trim().length === 0}
                         onClick={handleSave} // Redirects on save
-                        className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        className="confirm_save bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                         Save
                     </button>
                 </div>
@@ -124,7 +172,7 @@ export default function Collaborate() {
     );
 
     const exportModal = (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="export_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-5 rounded-lg shadow-xl">
             <h3 className="text-teal-1000 text-lg mb-4">Export as a file</h3>
             <div className="flex justify-between space-x-2">
@@ -149,12 +197,64 @@ export default function Collaborate() {
             </div>
           </div>
         </div>
-      );
+    );
+
+    const removeModal = (
+        <div className="remove_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-5 rounded-lg shadow-xl">
+                <h3 className="text-teal-1000 text-lg mb-4">Are you sure you want to remove '{collaboratorToRemove.slice(0, 5)}'?</h3>
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setRemoveModalOpened(false)} // Close modal on cancel
+                        className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mr-2">
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleRemoveCollaborator}
+                        className="confirm_remove bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
+    const inviteModal = (
+        <div className="invite_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-5 rounded-lg shadow-lg w-1/4">
+                <h3 className="text-lg mb-2 text-teal-1000">Invite collaborator:</h3> 
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={iniviteeEmail}
+                    onChange={(e) => setIniviteeEmail(e.target.value)}
+                    placeholder="Enter email"
+                    required
+                    className="w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                />
+                {emailError && <p className="mt-1 error_message text-red-700 text-[10px]">{emailError}</p>}
+                {successInviteMessage && <p className="success_message bg-teal-100 text-teal-600 text-center mt-1 rounded-md">{successInviteMessage}</p>}
+                <div className="mt-3 flex justify-end">
+                    <button
+                        onClick={() => {setInviteModalOpened(false); ; setIniviteeEmail(''); setEmailError('')}} // Close modal on cancel
+                        className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mr-2">
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleInvite} 
+                        className="confirm_invite bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        Invite
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="flex h-screen bg-teal-50">
             {/* Sidebar */}
-            <div className="w-1/6 bg-white text-black p-4 rounded-lg shadow-lg ">
+            <div className="side_bar w-1/6 bg-white text-black p-4 rounded-lg shadow-lg ">
                 <p className="text-sm font-semibold mb-4 text-teal-800 text-center">Speech to Text Application</p>
                 <ul className="space-y-2">
                     <li>
@@ -165,9 +265,9 @@ export default function Collaborate() {
                         </Link>
                     </li>
                     <li>
-                        <Link href="/collaborate">
+                        <Link href="/create">
                             <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
-                                Collaborate
+                                Create New
                             </button>
                         </Link>
                     </li>
@@ -203,7 +303,7 @@ export default function Collaborate() {
                 <div className="flex justify-evenly">
                     <button
                         disabled={sessionEnd} // Disable when session has ended
-                        className={`w-1/4 py-3 px-4 rounded-md mt-5
+                        className={`start_button w-1/4 py-3 px-4 rounded-md mt-5
                             ${sessionEnd
                                 ? 'bg-teal-100 text-gray-600' // Disabled style when session ends
                                 : isListening
@@ -217,7 +317,7 @@ export default function Collaborate() {
                     </button>
                     <button
                         disabled={!isListening} // Only enabled when listening
-                        className={`w-1/4 py-3 px-4 rounded-md mt-5         
+                        className={`controller w-1/4 py-3 px-4 rounded-md mt-5         
                             ${(!isListening
                                 ? 'bg-teal-100 text-gray-600'
                                 : 'bg-teal-600 hover:bg-teal-700 text-white'
@@ -225,7 +325,7 @@ export default function Collaborate() {
                             focus:outline-none focus:ring-2 focus:ring-teal-500`}
                         onClick={handlePlayPauseClick}
                     >
-                        {isPaused ? 'Play' : 'Pause'}
+                        {isPaused ? 'Resume' : 'Pause'}
                     </button>
                     <button
                         disabled={!sessionEnd} // Disabled if session has not ended
@@ -245,7 +345,7 @@ export default function Collaborate() {
                     <button
                         onClick={() => setSaveModalOpened(true)}
                         disabled={speechData.trim().length === 0 || !sessionEnd} // Disabled if text area is empty or session has not ended
-                        className={`w-1/4 py-3 px-4 rounded-md
+                        className={`save_button w-1/4 py-3 px-4 rounded-md
                             ${speechData.trim().length === 0 || !sessionEnd
                                 ? 'bg-teal-100 text-gray-600' // Disabled style
                                 : 'bg-teal-600 hover:bg-teal-700 text-white'
@@ -271,7 +371,7 @@ export default function Collaborate() {
                     <button
                         onClick={() => setExportModalOpened(true)}
                         disabled={speechData.trim().length === 0 || !sessionEnd} // Disabled if text area is empty or session has not ended
-                        className={`w-1/4 py-3 px-4 rounded-md
+                        className={`export_button w-1/4 py-3 px-4 rounded-md
                             ${speechData.trim().length === 0 || !sessionEnd
                                 ? 'bg-teal-100 text-gray-600' // Disabled style
                                 : 'bg-teal-600 hover:bg-teal-700 text-white'
@@ -284,28 +384,46 @@ export default function Collaborate() {
                 </div>
             </div>
             {/* Collaborators Sidebar */}
-            <div className="w-1/6 bg-white p-4 rounded-lg shadow-lg ">
+            <div className="collab_bar w-1/6 bg-white p-4 rounded-lg shadow-lg ">
                 <p className="text-sm font-semibold mb-4 text-teal-800 text-center">Collaborators</p>
-                <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4 transition duration-200">
+                <button
+                    onClick={() => setInviteModalOpened(true)} 
+                    className="invite_btn w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4 transition duration-200">
                     Invite User
                 </button>
                 <div className="mt-4">
-                    <ul className="space-y-3">
+                    <ul className="collaborators_list space-y-3">
                         <li className="flex justify-between items-center text-teal-800">
                             <span className="font-semibold text-sm">User1 (Host)</span>
-                            <button className="text-teal-600 hover:text-teal-700 text-sm">Remove</button>
                         </li>
-                        <li className="flex justify-between items-center text-teal-800">
-                            <span className="font-semibold text-sm">User2</span>
-                            <button className="text-teal-600 hover:text-teal-700 text-sm">Remove</button>
-                        </li>
-                        <li className="flex justify-between items-center text-teal-800">
-                            <span className="font-semibold text-sm">User3</span>
-                            <button className="text-teal-600 hover:text-teal-700 text-sm">Remove</button>
-                        </li>
+                        {collaborators.map((collaborator) => (
+                            <li key={collaborator} className="flex justify-between items-center text-teal-800">
+                                <span className="font-semibold text-sm">
+                                    {collaborator.includes('@') ? (
+                                        <>
+                                            {collaborator.slice(0, 5)} <span className="text-teal-500 text-xs">(Pending)</span>
+                                        </>
+                                    ) : (
+                                        collaborator
+                                    )}
+                                </span>
+                                <button
+                                    id={`${collaborator.slice(0, 5)}_remove`}
+                                    className="text-teal-500 hover:text-teal-700 font-semibold text-xs"
+                                    onClick={() => {
+                                        setCollaboratorToRemove(collaborator);
+                                        setRemoveModalOpened(true);
+                                    }}
+                                >
+                                    Remove
+                                </button>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             </div>
+            {inviteModalOpened && inviteModal}
+            {removeModalOpened && removeModal}
         </div>
     );
 }
