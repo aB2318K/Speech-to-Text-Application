@@ -58,7 +58,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-teal-50">
       {/* Sidebar */}
-      <div className="w-1/6 bg-white text-black p-4 rounded-lg shadow-lg text-center">
+      <div className="side_bar w-1/6 bg-white text-black p-4 rounded-lg shadow-lg text-center">
         <p className="text-sm font-semibold mb-4 text-teal-800">Speech to Text Application</p>
         <ul className="space-y-2">
           <li>
@@ -98,7 +98,7 @@ export default function Dashboard() {
           Saved Speeches
         </h2>
         {userSpeeches.length > 0 ? (
-          <ul className="space-y-4">
+          <ul className="speeches space-y-4">
             {userSpeeches.map((speech) => (
               <Link key={speech.id} href={`/speech/${speech.id}`} className="block">
                 <li className="p-3 bg-white rounded-md text-teal-900 hover:bg-teal-100 transition duration-200 ease-in-out shadow-md">
@@ -108,7 +108,7 @@ export default function Dashboard() {
             ))}
           </ul>
         ) : (
-          <div className="block text-sm font-medium text-teal-800 text-center">
+          <div className="no_speech block text-sm font-medium text-teal-800 text-center">
             You don&apos;t have any saved speeches at the moment.
           </div>
         )}

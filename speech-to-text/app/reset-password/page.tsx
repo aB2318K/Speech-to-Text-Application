@@ -31,7 +31,6 @@ export default function Reset() {
              }
                 */
             setSuccessMessage('A password reset link has been sent to your email'); 
-            console.log(successMessage)
         } 
     }
 
