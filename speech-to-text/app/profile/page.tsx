@@ -262,7 +262,7 @@ export default function Profile() {
                             <button onClick={() => {
                                 setTempFirstName(firstName); // Initialize temp with current value
                                 setFirstNameModalOpened(true);
-                            }} className="edit_first_name text-sm py-1 px-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            }} className="edit_first_name py-1 px-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 Edit
                             </button>
                         </li>
@@ -271,12 +271,12 @@ export default function Profile() {
                             <button onClick={() => {
                                 setTempLastName(lastName); // Initialize temp with current value
                                 setLastNameModalOpened(true);
-                            }} className="edit_last_name text-sm py-1 px-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            }} className="edit_last_name  py-1 px-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 Edit
                             </button>
                         </li>
                         <li className="flex justify-center">
-                            <button onClick={() => setPasswordModalOpened(true)} className="text-sm py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <button onClick={() => setPasswordModalOpened(true)} className="py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 Change Password
                             </button>
                         </li>
