@@ -9,7 +9,7 @@ describe('Dashboard Page Test', () => {
         cy.contains('Speech to Text Application').should('exist');
         cy.contains('Create New').should('exist');
         cy.contains('Collaborate').should('exist');
-        cy.contains('Change Password').should('exist');
+        cy.contains('Profile').should('exist');
         cy.contains('Log Out').should('exist');
       });
     });
@@ -41,8 +41,8 @@ describe('Dashboard Page Test', () => {
         cy.url().should('include', '/collaborate');
         cy.visit('http://localhost:3000/dashboard/0');
     
-        cy.contains('Change Password').click();
-        cy.url().should('include', '/new-password/0');
+        cy.contains('Profile').click();
+        cy.url().should('include', '/profile');
         cy.visit('http://localhost:3000/dashboard/0');
     
         cy.contains('Log Out').click();

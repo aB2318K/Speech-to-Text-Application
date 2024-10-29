@@ -272,9 +272,9 @@ export default function Collaborate() {
                         </Link>
                     </li>
                     <li>
-                        <Link href="/new-password/0">
-                        <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
-                            Change Password
+                        <Link href="/profile">
+                            <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
+                                Profile
                         </button>
                         </Link>
                     </li>

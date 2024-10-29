@@ -89,7 +89,7 @@ export default function NewPassword() {
                             name="re-enter-password"
                             className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                         />
-                        {matchError && <p className="empty_error text-red-700 text-[10px] inline-block">{matchError}</p>}
+                        {matchError && <p className="match_error text-red-700 text-[10px] inline-block">{matchError}</p>}
                     </div>
                     <button
                         type="submit"

@@ -19,7 +19,7 @@ describe('login_page_test', () => {
         cy.get('input[id="password"]').type('validPassword1!');
         cy.get('input[id="re-enter-password"]').type('validPassword2!');
         cy.get('button[type="submit"]').click();
-        cy.get('.empty_error').should('be.visible').and('contain', '*Passwords do not match');
+        cy.get('.match_error').should('be.visible').and('contain', '*Passwords do not match');
     })
 
     it('Should navigate to log in page upon success', () => {
