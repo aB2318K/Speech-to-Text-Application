@@ -32,9 +32,9 @@ async function comparePasswords(password, hashedPassword) {
 
 //generate token for a period of 2 hour
 function generateToken(user) {
-    return jwt.sign({id: user.id}, process.env.JWT_SECRET_KEY), {
+    return jwt.sign({id: user.id}, process.env.JWT_SECRET_KEY, {
         expiresIn: '2h', //set token expiration time
-    }
+    });
 }
 
 
@@ -75,7 +75,7 @@ async function signUpUser(req, res) {
         password: hashedPassword
     });
     //TODO SAVE INTO THE DATABASE
-    const saveUser = newUser.save();
+    const saveUser = await newUser.save();
     res.status(201).json({ message: 'Registration was successful', user: saveUser});
 }
 

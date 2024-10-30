@@ -65,10 +65,10 @@ export default function SignUp() {
         if (isEmailValid && isPasswordValid && isFirstNameValid && isLastNameValid) {
           try {
             const requestData = {
-              firstName,
-              lastName,
-              email,
-              password,
+                firstname: firstName, //Should match the backend expectation 
+                lastname: lastName,  
+                email,
+                password,
             };
       
             const response = await fetch('http://localhost:9000/signup', {
