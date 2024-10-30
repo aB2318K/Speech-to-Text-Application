@@ -33,7 +33,7 @@ export default function LogIn() {
           if data is found then successfully send the user to their dashboard.
           router.push(`/dashboard/${id}`);
           */ 
-            router.push(`/dashboard`);
+            router.push(`/dashboard/0`);
         }
     };
 
