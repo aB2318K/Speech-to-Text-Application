@@ -81,7 +81,7 @@ export default function SignUp() {
       
             const data = await response.json();
             if (response.ok) {
-              setSuccessMessage('You have successfully created an account. Redirecting to login Page...');
+              setSuccessMessage('You have successfully created an account. Redirecting to Login Page...');
               setTimeout(() => {
                 router.push('/login'); // Redirect to login 
               }, 3000);
