@@ -50,30 +50,51 @@ export default function SignUp() {
         }
     };
 
-    const handleSubmission = (event: React.MouseEvent) => {
+    const handleSubmission = async (event: React.MouseEvent) => {
         event.preventDefault();
         setPasswordError('');
         setEmailError('');
         setFirstNameError('');
         setLastNameError('');
-
+      
         const isEmailValid = emailValidator();
         const isPasswordValid = passwordValidator();
         const isFirstNameValid = fieldValidator(firstName, setFirstNameError);
         const isLastNameValid = fieldValidator(lastName, setLastNameError);
-
+      
         if (isEmailValid && isPasswordValid && isFirstNameValid && isLastNameValid) {
-            //Before creating the account check if the email is already used
-            /*if the email is already in database{
-                display a message saying email already used
-            } */
-            setSuccessMessage('You have successfully created an account. Redirecting to Log In page');
-
-            setTimeout(() => {
-                router.push('/login'); // Redirect to login page
-            }, 3000); 
+          try {
+            const requestData = {
+              firstName,
+              lastName,
+              email,
+              password,
+            };
+      
+            const response = await fetch('http://localhost:9000/signup', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(requestData),
+            });
+      
+            const data = await response.json();
+            if (response.ok) {
+              setSuccessMessage('You have successfully created an account. Redirecting to login Page...');
+              setTimeout(() => {
+                router.push('/login'); // Redirect to login 
+              }, 3000);
+            } else {
+              // email is already in use?
+              setEmailError(data.message || 'An error occurred while signing up.');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            setEmailError('An error occurred while trying to sign up.');
+          }
         }
-    };
+      };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-teal-50"> 

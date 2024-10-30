@@ -2,8 +2,12 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const express = require('express');
+const CORS = require('cors');
+const User = require('./models/user');
 
 const app = express();
+app.use(CORS());
+app.use(express.json());
 require('dotenv').config();
 
 mongoose.connect('mongodb://localhost:27017', {
@@ -36,45 +40,43 @@ function generateToken(user) {
 
 //login auhentication flow
 async function loginUser(req, res) {
-    const {username, password} = req.body;
+    const { email, password } = req.body;
 
-    //get user from database TODO
-    const user = {
-        id: 1,
-        firstname: 'Ansh',
-        password: 'dfgbjdnfdkgbfkdjgn'
-    };
+    try {
+        const currentUser = await User.findOne({ email });
+        if (!currentUser) {
+            return res.status(404).json({ message: 'User cannot be not found' });
+        }
 
-    if(!user) {
-        res.status(404).json({message: "User cannot be found"});
+        const checkIfPasswordValid = await comparePasswords(password, currentUser.password);
+        if (!checkIfPasswordValid) {
+            return res.status(401).json({ message: 'Access denied, passwords do not match' });
+        }
+
+        const token = generateToken(currentUser);
+        res.status(200).json({ message: 'Login was successful', token });
+    } catch (error) {
+        res.status(400).json({ message: 'Error during login', error: error.message });
     }
 
-    const checkIfPasswordValid = await comparePasswords(password, user.password);
-    if(!checkIfPasswordValid) {
-        res.status(401).json({ message: 'Access denied, the passwords do not match'});
-    }
-
-    const token = generateToken(user);
-
-    res.status(200).json({ message: 'Login was successful', token});
 }
 
 //sign up authentication flow
 async function signUpUser(req, res) {
-    const {username, password} = req.body;
+    const { firstname, lastname, email, password } = req.body;
 
     //hash the password
     const hashedPassword  = await hashPassword(password);
 
-    const newUser = {
-        id: 1,
-        firstname: 'Ansh',
-        lastname: 'Baral',
-        username,
+    const newUser = new User( {
+        firstname,
+        lastname,
+        email,
         password: hashedPassword
-    };
+    });
     //TODO SAVE INTO THE DATABASE
-    res.status(201).json({ message: 'Registration was successful', user: newUser});
+    const saveUser = newUser.save();
+    res.status(201).json({ message: 'Registration was successful', user: saveUser});
 }
 
 
