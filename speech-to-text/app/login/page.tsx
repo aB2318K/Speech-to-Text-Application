@@ -10,6 +10,7 @@ export default function LogIn() {
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     const fieldValidator = (userInput: string, setError: React.Dispatch<React.SetStateAction<string>>) => {
         if (userInput.trim().length === 0) {
@@ -21,19 +22,41 @@ export default function LogIn() {
         }
     };
 
-    const handleSubmission = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmission = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault(); 
         const isEmailValid = fieldValidator(email, setEmailError);
         const isPasswordValid = fieldValidator(password, setPasswordError);
 
         if (isEmailValid && isPasswordValid) {
-          //Add the logic to check if the entered password is present in the database
-          /*
-          if data is not found display a message saying the email or password is incorrect.
-          if data is found then successfully send the user to their dashboard.
-          router.push(`/dashboard/${id}`);
-          */ 
-            router.push(`/dashboard/0`);
+            try {
+                const requestData = {
+                    email,
+                    password,
+                };
+          
+                const response = await fetch('http://localhost:9000/login', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(requestData),
+                });
+          
+                const data = await response.json();
+                if (response.ok) {
+                    setSuccessMessage('You have successfully logged in.');
+                    localStorage.setItem('userID', data.userID);
+                    localStorage.setItem('token', data.token);
+                    const token = localStorage.getItem('token');
+                    if (token) router.push('/dashboard');
+                } else {
+                  setEmailError(data.message || 'An error occurred while signing up.');
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                setEmailError('An error occurred while trying to sign up.');
+              }
+           
         }
     };
 

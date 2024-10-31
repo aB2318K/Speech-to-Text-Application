@@ -42,7 +42,7 @@ const users: { [key: number]: User } = {
 
 export default function Dashboard() {
   const params = useParams();
-  const userId = parseInt(params.userId as string); // Convert userId to a number
+  const userId = parseInt(localStorage.getItem('userID') as string);
 
   // Function to get user speeches
   const getUserSpeeches = (userId: number): Speech[] => {
