@@ -65,20 +65,32 @@ async function loginUser(req, res) {
 async function signUpUser(req, res) {
     const { firstname, lastname, email, password } = req.body;
 
-    //hash the password
-    const hashedPassword  = await hashPassword(password);
+    try {
+        // Check if the user with this email already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: '*This email is already registered. Try logging in instead.' });
+        }
 
-    const newUser = new User( {
-        firstname,
-        lastname,
-        email,
-        password: hashedPassword
-    });
-    //TODO SAVE INTO THE DATABASE
-    const saveUser = await newUser.save();
-    res.status(201).json({ message: 'Registration was successful', user: saveUser});
+        // Hash the password
+        const hashedPassword = await hashPassword(password);
+
+        // Create new user instance
+        const newUser = new User({
+            firstname,
+            lastname,
+            email,
+            password: hashedPassword
+        });
+
+        // Save new user to the database
+        const savedUser = await newUser.save();
+        res.status(201).json({ message: 'Registration was successful', user: savedUser });
+    } catch (error) {
+        console.error('Error during sign up:', error.message);
+        res.status(500).json({ message: 'An error occurred during sign up.', error: error.message });
+    }
 }
-
 
 //middle for JWT authentication
 function authenticateToken(req, res, next) { 
