@@ -1,4 +1,4 @@
-describe('Dashboard Page Test', () => {
+describe('Create Page Test', () => {
     beforeEach(() => {
       cy.visit('http://localhost:3000/create');
     });

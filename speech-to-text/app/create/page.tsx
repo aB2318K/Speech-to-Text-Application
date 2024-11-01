@@ -46,7 +46,7 @@ export default function Create() {
     const handleSave = () => {
         // Later write the logic to save in the database         
         setSaveModalOpened(false);
-        router.push('/dashboard/[id]');
+        router.push('/dashboard');
         setSpeechTitle("");   
     }
 
@@ -158,7 +158,7 @@ export default function Create() {
                 <p className="text-sm font-semibold mb-4 text-teal-800 text-center">Speech to Text Application</p>
                 <ul className="space-y-2">
                     <li>
-                        <Link href={`/dashboard/${userId}`}>
+                        <Link href={`/dashboard`}>
                             <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-2">
                                 Home
                             </button>

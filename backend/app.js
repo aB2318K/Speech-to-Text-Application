@@ -6,7 +6,7 @@ const CORS = require('cors');
 const User = require('./models/user');
 
 const app = express();
-app.use(CORS());
+app.use(CORS({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 require('dotenv').config();
 
@@ -94,7 +94,9 @@ async function signUpUser(req, res) {
 
 //middle for JWT authentication
 function authenticateToken(req, res, next) { 
+    console.log("running")
     const token = req.header('Authorization')?.split(' ')[1];
+    console.log(token);
 
     if(!token) {
         return res.status(401).json({ message: 'Access denied, no token given'});
@@ -127,4 +129,4 @@ app.get('/logout', (req, res) => {
 })
 
 const PORT = process.env.PORT || 9000;
-app.listen(PORT, () => console.log(`Serer is running on ${PORT}`));
+app.listen(PORT, () => console.log(`Server is running on ${PORT}`));

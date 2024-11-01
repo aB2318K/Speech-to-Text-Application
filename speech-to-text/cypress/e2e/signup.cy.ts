@@ -43,7 +43,7 @@ describe('signup_page_test', () => {
         cy.get('input[type="email"]').type('validEmail@example.com');
         cy.get('input[type="password"]').type('validPassword1!');
         cy.get('button[type="submit"]').click();
-        cy.get('.success_message').should('exist').and('contain', 'You have successfully created an account. Redirecting to Log In page')
+        cy.get('.success_message').should('exist').and('contain', 'You have successfully created an account. Redirecting to Login Page...')
         cy.url().should('include', '/login');
     })
 
@@ -53,9 +53,12 @@ describe('signup_page_test', () => {
         cy.url().should('include', '/login');
     })
 
-    /*
     it('Should not let users register with a registered email', () => {
-
+        cy.get('input[name="first_name"]').type('First');
+        cy.get('input[name="last_name"]').type('Last');
+        cy.get('input[type="email"]').type('validEmail@example.com');
+        cy.get('input[type="password"]').type('validPassword1!');
+        cy.get('button[type="submit"]').click();
+        cy.get('.error_message').should('be.visible').and('contain', '*This email is already registered. Try logging in instead.')
     }) 
-    */
 })

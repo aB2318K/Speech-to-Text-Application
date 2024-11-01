@@ -1,4 +1,4 @@
-describe('login_page_test', () => {
+describe('New Password page test', () => {
     beforeEach(() => {
         cy.visit('http://localhost:3000/new-password/[id]');
     });

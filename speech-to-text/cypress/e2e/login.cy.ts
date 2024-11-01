@@ -26,15 +26,28 @@ describe('login_page_test', () => {
       
         cy.url().should('include', '/signup'); //check that were' on the right page
     })
-    /*
+    
     it('should not log in with incorrect credentials', () => {
         cy.get('input[type="email"]').type('wrong@example.com');
         cy.get('input[type="password"]').type('wrongpassword');
       
         cy.get('button[type="submit"]').click();
       
-        cy.contains('Invalid email or password').should('exist');
+        cy.contains('*This email address was not found. Please check for typos or create a new account.').should('exist');
+        cy.get('input[type="email"]').clear().type('testEmail@example.com');
+        cy.get('input[type="password"]').type('wrongpassword');
+        cy.get('button[type="submit"]').click();
+        cy.contains('*Incorrect password. Please try again or reset your password.').should('exist');
+        cy.url().should('include', '/login');
     })
-    */
+
+    it('Should successfully log in with correct credentials', () => {
+        cy.get('input[type="email"]').type('testEmail@example.com');
+        cy.get('input[type="password"]').type('testPassword123!');
+        cy.get('button[type="submit"]').click();
+        cy.contains('You have successfully logged in.');
+        cy.url().should('include', '/dashboard');
+    })
+    
 } )
 

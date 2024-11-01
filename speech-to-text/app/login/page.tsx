@@ -21,6 +21,19 @@ export default function LogIn() {
             return true;
         }
     };
+    
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value);
+        setEmailError('');
+        setSuccessMessage('');
+    };
+    
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
+        setPasswordError('');
+        setSuccessMessage('');
+    };
+    
 
     const handleSubmission = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault(); 
@@ -48,9 +61,15 @@ export default function LogIn() {
                     localStorage.setItem('userID', data.userID);
                     localStorage.setItem('token', data.token);
                     const token = localStorage.getItem('token');
-                    if (token) router.push('/dashboard');
+                    if (token) {
+                        setTimeout(() => {
+                            router.push('/dashboard'); // Redirect to login 
+                          }, 1000);
+                    }
+                } else if (response.status === 404) {
+                  setEmailError('*This email address was not found. Please check for typos or create a new account.');
                 } else {
-                  setEmailError(data.message || 'An error occurred while signing up.');
+                    setPasswordError('*Incorrect password. Please try again or reset your password.')
                 }
               } catch (error) {
                 console.error('Error:', error);
@@ -78,7 +97,7 @@ export default function LogIn() {
                             type="email"
                             id="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={handleEmailChange}
                             name="email"
                             placeholder="Enter your email"
                             className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
@@ -96,7 +115,7 @@ export default function LogIn() {
                             type="password"
                             id="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             name="password"
                             placeholder="Enter your password"
                             className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
@@ -121,6 +140,7 @@ export default function LogIn() {
                         Register here
                     </Link>
                 </p>
+                {successMessage && <p className="success_message bg-teal-100 text-teal-600 text-center mt-4 rounded-md">{successMessage}</p>}
             </div>
         </div>
     );

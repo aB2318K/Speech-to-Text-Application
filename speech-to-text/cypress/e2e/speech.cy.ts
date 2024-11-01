@@ -1,4 +1,4 @@
-describe('Dashboard Page Test', () => {
+describe('Speech Page Test', () => {
     beforeEach(() => {
       // Visit the speech page, assuming the speech id is 001
       cy.visit('http://localhost:3000/speech/001');
