@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);

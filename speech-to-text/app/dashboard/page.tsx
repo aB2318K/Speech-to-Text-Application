@@ -1,10 +1,10 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import useAuth from "../hooks/page";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 
 // This is just an example of users and their saved speeches; use database later
@@ -44,16 +44,25 @@ const users: { [key: number]: User } = {
 };
 
 export default function Dashboard() {
-  const isAuthenticated = useAuth();
   const router = useRouter();
+  const [userId, setUserId] = useState<number | null>(null);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('userID');
+            if (storedUserId) {
+                setUserId(parseInt(storedUserId, 10));
+            }else {
+                router.push('/login');
+            }
+        }
+    }, [router]);
+  //const isAuthenticated = useAuth();
+  /*
   if(!isAuthenticated) {
     router.push('/login')
-  };
-  const params = useParams();
-  //const userId = parseInt(localStorage.getItem('userID') as string);
-  //The above line is failing the cypress test 
-  const userId = 1;
+  };*/
+  
 
   // Function to get user speeches
   const getUserSpeeches = (userId: number): Speech[] => {
@@ -64,7 +73,7 @@ export default function Dashboard() {
   };
 
   // Get speeches based on userId
-  const [userSpeeches] = useState(() => getUserSpeeches(userId));
+  const userSpeeches = userId !== null ? getUserSpeeches(userId) : [];
 
   return (
     <div className="flex h-screen bg-teal-50">

@@ -46,10 +46,13 @@ Cypress.Commands.add('login', () => {
     cy.request({
         method: 'POST',
         url: 'http://localhost:9000/login',
-        body: {
-            email: 'ansh',
-            password: ''
-        }
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: 'baralansh8@gmail.com',
+            password: 'testPassword123!'
+        })
     })
     .then((response) => {
         localStorage.setItem('token', response.body.token)
