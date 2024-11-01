@@ -1,6 +1,7 @@
 describe('Dashboard Page Test', () => {
     beforeEach(() => {
       // Visit the dashboard page; replace `0` with the appropriate user ID
+      cy.login();
       cy.visit('http://localhost:3000/dashboard');
     });
   

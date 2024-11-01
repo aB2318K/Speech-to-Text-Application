@@ -35,3 +35,23 @@
 //     }
 //   }
 // }
+
+declare namespace Cypress {
+    interface Chainable {
+        login(): Chainable<void>
+    }
+}
+
+Cypress.Commands.add('login', () => {
+    cy.request({
+        method: 'POST',
+        url: 'http://localhost:9000/login',
+        body: {
+            email: 'ansh',
+            password: ''
+        }
+    })
+    .then((response) => {
+        localStorage.setItem('token', response.body.token)
+    })
+})
