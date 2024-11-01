@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import useAuth from "../hooks/page";
+import { useRouter } from "next/router";
+
 
 // This is just an example of users and their saved speeches; use database later
 interface Speech {
@@ -41,6 +44,12 @@ const users: { [key: number]: User } = {
 };
 
 export default function Dashboard() {
+  const isAuthenticated = useAuth();
+  const router = useRouter();
+
+  if(!isAuthenticated) {
+    router.push('/login')
+  };
   const params = useParams();
   //const userId = parseInt(localStorage.getItem('userID') as string);
   //The above line is failing the cypress test 
