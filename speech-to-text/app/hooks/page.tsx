@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 const useAuth = () => {
@@ -19,4 +19,19 @@ const useAuth = () => {
     return isAuthenticated;
 }
 
-export default useAuth;
+const useLogout = () => {
+    const router = useRouter();
+
+    const logout = useCallback(() => {
+        // Remove token and userID from localStorage
+        localStorage.removeItem("token");
+        localStorage.removeItem("userID");
+        
+        // Redirect the user to the login page
+        router.push("/login");
+    }, [router]);
+
+    return logout;
+};
+
+export { useAuth, useLogout };

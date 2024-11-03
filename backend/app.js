@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const express = require('express');
 const CORS = require('cors');
 const User = require('./models/user');
+const Speech = require('./models/Speech');
 
 const app = express();
 app.use(CORS({ origin: 'http://localhost:3000' }));
@@ -94,7 +95,6 @@ async function signUpUser(req, res) {
 
 //middle for JWT authentication
 function authenticateToken(req, res, next) { 
-    console.log("running")
     const token = req.header('Authorization')?.split(' ')[1];
     console.log(token);
 
@@ -122,11 +122,58 @@ app.post('/signup', signUpUser);
 app.post('/login', loginUser);
 
 
+/*
 app.get('/logout', (req, res) => {
     //clear the cookies i.e. the token
     res.clearCookie('token');
     res.json({message: 'Logout successfully'});
 })
+*/
+
+app.post('/speeches', async (req, res) => {
+    try {
+        const { title, speechData, userId } = req.body;
+
+        // Validate that userId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID.' });
+        }
+
+        const user = mongoose.Types.ObjectId(userId); // Convert to ObjectId
+
+        const newSpeech = new Speech({
+            title,
+            data: speechData,
+            user 
+        });
+
+        const savedSpeech = await newSpeech.save();
+        res.status(201).json(savedSpeech);
+    } catch (error) {
+        console.error('Error creating speech:', error); 
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+});
+
+app.get('/speeches', async (req, res) => {
+    try {
+        const { userId } = req.query.userId;
+        console.log(userId);
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        const speeches = await Speech.find({ user: mongoose.Types.ObjectId(userId) });
+
+        if (speeches.length === 0) {
+            return res.status(404).json({ message: 'No speeches found for this user' });
+        }
+
+        return res.status(200).json({ speeches });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));

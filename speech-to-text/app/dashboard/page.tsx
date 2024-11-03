@@ -2,78 +2,54 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import useAuth from "../hooks/page";
+import { useAuth, useLogout} from "../hooks/page";
 import { useRouter } from "next/navigation";
 
 
-// This is just an example of users and their saved speeches; use database later
-interface Speech {
-  id: string;
-  title: string;
-  data: string;
-}
-
-interface User {
-  speeches: Speech[];
-}
-
-const users: { [key: number]: User } = {
-  0: {
-    speeches: [
-      {
-        id: "001",
-        title: "Speech 1",
-        data: "I am speech1"
-      },
-      {
-        id: "002",
-        title: "Speech 2",
-        data: "I am speech2"
-      },
-      {
-        id: "003",
-        title: "Speech 3",
-        data: "I am speech3"
-      }
-    ]
-  },
-  1: {
-    speeches: [] // Empty array for user 1
-  }
-};
-
 export default function Dashboard() {
   const router = useRouter();
-  const [userId, setUserId] = useState<number | null>(null);
+  useAuth();
+  const [userId, setUserId] = useState('');
+  const logout = useLogout();
+  const [loading, setLoading] = useState(true); // Loading state
 
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedUserId = localStorage.getItem('userID');
-            if (storedUserId) {
-                setUserId(parseInt(storedUserId, 10));
-            }else {
-                router.push('/login');
-            }
-        }
-    }, [router]);
-  //const isAuthenticated = useAuth();
-  /*
-  if(!isAuthenticated) {
-    router.push('/login')
-  };*/
-  
+  useEffect(() => {
+      if (typeof window !== 'undefined') {
+          const storedUserId = localStorage.getItem('userID');
+          if (storedUserId) {
+              setLoading(false);
+              setUserId(storedUserId);
+          }else {
+              router.push('/login');
+          }
+      }
+  }, [router]);
 
   // Function to get user speeches
-  const getUserSpeeches = (userId: number): Speech[] => {
-    if (userId in users) {
-      return users[userId].speeches; // This returns an array of speech objects
+  const getUserSpeeches = async (userId: string): Promise<any[]> => {
+    try {
+      const response = await fetch(`http://localhost:9000/speeches?userId=${userId}`, {
+        method: 'GET',
+      });
+      const data = await response.json();
+      return response.ok && Array.isArray(data.speeches) ? data.speeches : [];
+    } catch (error) {
+      console.error('Error:', error);
+      return []; 
     }
-    return []; // Return an empty array if userId is not found
   };
+  
 
   // Get speeches based on userId
   const userSpeeches = userId !== null ? getUserSpeeches(userId) : [];
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-teal-50 items-center justify-center">
+        <div className="spinner"></div> 
+      </div>
+    ); // Show spinner while checking auth
+  }
 
   return (
     <div className="flex h-screen bg-teal-50">
@@ -104,7 +80,9 @@ export default function Dashboard() {
           </li>
           <li>
             <Link href="/login">
-              <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <button 
+                onClick={logout}
+                className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                 Log Out
               </button>
             </Link>
@@ -119,13 +97,13 @@ export default function Dashboard() {
         </h2>
         {userSpeeches.length > 0 ? (
           <ul className="speeches space-y-4">
-            {userSpeeches.map((speech) => (
+            {/*userSpeeches.map((speech) => (
               <Link key={speech.id} href={`/speech/${speech.id}`} className="block">
                 <li className="p-3 bg-white rounded-md text-teal-900 hover:bg-teal-100 transition duration-200 ease-in-out shadow-md">
                   {speech.title}
                 </li>
               </Link>
-            ))}
+            ))*/}
           </ul>
         ) : (
           <div className="no_speech block text-sm font-medium text-teal-800 text-center">

@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAuth, useLogout } from "../hooks/page";
+
 
 export default function Create() {
     const router = useRouter();
+    const [userId, setUserId] = useState('');
     const [isListening, setIsListening] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
     const [sessionEnd, setSessionEnd] = useState(false);
@@ -15,8 +18,22 @@ export default function Create() {
     const [exportModalOpened, setExportModalOpened] = useState(false);
     const [speechData, setspeechData] = useState(""); // State to hold speech text
     const [speechTitle, setSpeechTitle] = useState("");
-    const params = useParams();
-    const userId = parseInt(params.userId as string); // Convert userId to a number
+
+    const isAuthenticated = useAuth();
+    const logout = useLogout();
+    const [loading, setLoading] = useState(true); // Loading state
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUserId = localStorage.getItem('userID');
+            if (storedUserId) {
+                setLoading(false);
+                setUserId(storedUserId);
+            }else {
+                router.push('/login');
+            }
+        }
+    }, [router]);;
 
     // Toggle the listening state
     const handleMicrophoneClick = () => {
@@ -38,13 +55,38 @@ export default function Create() {
     };
 
     const handleDelete = () => {
-        // Later write the logic to delete from the database
         setDelModalOpened(false);
         window.location.reload();
     }
 
-    const handleSave = () => {
-        // Later write the logic to save in the database         
+    const handleSave = async () => {
+        if (speechTitle && speechData) {
+            try {
+                const requestData = {
+                    title: speechTitle,
+                    speechData: speechData,
+                    userId: userId
+                };
+                const response = await fetch('http://localhost:9000/speeches', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(requestData),
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    console.log(data);
+                    
+                } else {
+                    console.log(data)
+                }
+              } catch (error) {
+                console.error('Error:', error);
+              }
+        }
+
         setSaveModalOpened(false);
         router.push('/dashboard');
         setSpeechTitle("");   
@@ -151,6 +193,14 @@ export default function Create() {
         </div>
       );
 
+    if (loading) {
+        return (
+          <div className="flex h-screen bg-teal-50 items-center justify-center">
+            <div className="spinner"></div> 
+          </div>
+        ); // Show spinner while checking auth
+    }
+
     return (
         <div className="flex h-screen bg-teal-50">
             {/* Sidebar */}
@@ -180,7 +230,9 @@ export default function Create() {
                     </li>
                     <li>
                         <Link href="/login">
-                            <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <button 
+                                onClick={logout}
+                                className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 Log Out
                             </button>
                         </Link>
