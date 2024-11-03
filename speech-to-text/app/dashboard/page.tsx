@@ -26,7 +26,7 @@ export default function Dashboard() {
   }, [router]);
 
   // Function to get user speeches
-  const getUserSpeeches = async (userId: string): Promise<any[]> => {
+  const getUserSpeeches = async (userId: string) => {
     try {
       const response = await fetch(`http://localhost:9000/speeches?userId=${userId}`, {
         method: 'GET',

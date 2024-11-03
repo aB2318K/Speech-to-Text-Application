@@ -5,6 +5,7 @@ const express = require('express');
 const CORS = require('cors');
 const User = require('./models/user');
 const Speech = require('./models/Speech');
+const { isValidObjectId } = require('mongoose');
 
 const app = express();
 app.use(CORS({ origin: 'http://localhost:3000' }));
@@ -139,7 +140,7 @@ app.post('/speeches', async (req, res) => {
             return res.status(400).json({ message: 'Invalid user ID.' });
         }
 
-        const user = mongoose.Types.ObjectId(userId); // Convert to ObjectId
+        const user = new mongoose.Types.ObjectId(userId); // Convert to ObjectId
 
         const newSpeech = new Speech({
             title,
@@ -157,21 +158,22 @@ app.post('/speeches', async (req, res) => {
 
 app.get('/speeches', async (req, res) => {
     try {
-        const { userId } = req.query.userId;
-        console.log(userId);
+        const { userId } = req.query; 
         if (!mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).json({ message: 'Invalid user ID' });
+            return res.status(400).json({ message: 'Invalid user ID.' });
         }
 
-        const speeches = await Speech.find({ user: mongoose.Types.ObjectId(userId) });
+        const userObjectId = new mongoose.Types.ObjectId(userId);
 
+        const speeches = await Speech.find({ user: userObjectId });
         if (speeches.length === 0) {
-            return res.status(404).json({ message: 'No speeches found for this user' });
+            return res.status(404).json({ message: 'No speeches found for this user.' });
         }
 
-        return res.status(200).json({ speeches });
+        return res.status(200).json(speeches);
     } catch (error) {
-        return res.status(500).json({ message: 'Server error', error: error.message });
+        console.error('Error fetching speeches:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
     }
 });
 
