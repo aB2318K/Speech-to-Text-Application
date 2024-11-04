@@ -1,43 +1,27 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useAuth, useLogout } from "@/app/hooks/page";
 
-// Simulated data for users and their speeches (replace this with real database logic later)
 interface Speech {
-  id: string;
+  _id: string;
   title: string;
   data: string;
 }
 
-interface User {
-  speeches: Speech[];
-}
-
-const users: { [key: number]: User } = {
-  0: {
-    speeches: [
-      { id: "001", title: "Speech 1", data: "I am speech 1" },
-      { id: "002", title: "Speech 2", data: "I am speech 2" },
-      { id: "003", title: "Speech 3", data: "I am speech 3" }
-    ]
-  },
-  1: {
-    speeches: [] // Empty array for user 1
-  }
-};
-
 export default function Speech() {
+  useAuth();
+  const logout = useLogout();
   const params = useParams();
   const router = useRouter();
-  const userId = parseInt(params.speechId[0] as string);
+  const [userId, setUserId] = useState('');
   const speechId = params.speechId as string;
-  const speech = users[userId].speeches.find((speech) => speech.id === speechId);
-  const [speechTitle, setSpeechTitle] = useState(speech?.title || "");
-  const [speechData, setSpeechData] = useState(speech?.data || "");
-  const [editableTitle, setEditableTitle] = useState(speech?.title || "");
-  const [editableData, setEditableData] = useState(speech?.data || "");
+  const [speech, setSpeech] = useState({});
+  const [speechTitle, setSpeechTitle] = useState("");
+  const [speechData, setSpeechData] = useState("");
+  const [editableTitle, setEditableTitle] = useState("");
+  const [editableData, setEditableData] = useState("");
   const [delModalOpened, setDelModalOpened] = useState(false);
   const [exportModalOpened, setExportModalOpened] = useState(false);
   const isTitleChanged = editableTitle !== speechTitle;
@@ -45,14 +29,110 @@ export default function Speech() {
   const isDataEmpty = editableData.trim().length === 0;
   const isTitleEmpty = editableTitle.trim().length === 0;
 
-  const handleSave = () => {
-    setSpeechTitle(editableTitle);
-    setSpeechData(editableData);
+  const [loading, setLoading] = useState(true); // Loading state
+
+  const getSpeech = async (speechId: string, userId: string) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`http://localhost:9000/speeches/${speechId}?userId=${userId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error:', error);
+      return []; 
+    }
+  }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        const storedUserId = localStorage.getItem('userID');
+        if (storedUserId && token) {
+          setLoading(false);
+          setUserId(storedUserId);
+          const fetchSpeech = async () => {
+            const fetchedSpeech = await getSpeech(speechId, storedUserId);
+            setSpeech(fetchedSpeech);
+            if (fetchedSpeech) {
+              setSpeechTitle(fetchedSpeech.title || "");
+              setSpeechData(fetchedSpeech.data || "");
+              setEditableTitle(fetchedSpeech.title || "");
+              setEditableData(fetchedSpeech.data || "");
+            }
+            setLoading(false);
+          };
+          fetchSpeech();
+        }else {
+          router.push('/login');
+        }
+    }
+  }, [router]);  
+
+  const handleSave = async () => {
+    if (editableTitle.trim() && editableData.trim()) {
+      try {
+          const requestData = {
+              title: editableTitle,
+              data: editableData,
+              userId: userId
+          };
+          const token = localStorage.getItem('token');
+          const response = await fetch(`http://localhost:9000/speeches/${speechId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(requestData),
+          });
+          
+          const data = await response.json();
+          if (response.ok) {
+              console.log(data);
+              setSpeechTitle(editableTitle);
+              setSpeechData(editableData);
+          } else {
+              console.log(data)
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        }
+    }
+
   };
 
-  const handleDelete = () => {
-    setDelModalOpened(false);
-    router.push(`/dashboard`);
+  const handleDelete = async () => {
+    const token = localStorage.getItem('token');
+    const requestData = {
+        userId: userId, 
+    };
+    try {
+        const response = await fetch(`http://localhost:9000/speeches/${speechId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        if (response.ok) {
+            console.log('Speech deleted successfully');
+            setDelModalOpened(false); // Close the delete modal
+            router.push('/dashboard'); // Redirect to dashboard or wherever you want
+        } else {
+            const data = await response.json();
+            console.error(data.message);
+        }
+    } catch (error) {
+        console.error('Error deleting speech:', error);
+    }
   };
 
   const handleExportTxt = () => {
@@ -128,6 +208,14 @@ export default function Speech() {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-teal-50 items-center justify-center">
+        <div className="spinner"></div> 
+      </div>
+    ); // Show spinner while checking auth
+  }
+
   return (
     <div className="flex h-screen bg-teal-50">
       {/* Sidebar */}
@@ -164,7 +252,9 @@ export default function Speech() {
           </li>
           <li>
             <Link href="/login">
-              <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <button 
+                  onClick={logout}
+                className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                 Log Out
               </button>
             </Link>

@@ -5,7 +5,6 @@ const express = require('express');
 const CORS = require('cors');
 const User = require('./models/user');
 const Speech = require('./models/Speech');
-const { isValidObjectId } = require('mongoose');
 
 const app = express();
 app.use(CORS({ origin: 'http://localhost:3000' }));
@@ -131,7 +130,7 @@ app.get('/logout', (req, res) => {
 })
 */
 
-app.post('/speeches', async (req, res) => {
+app.post('/speeches', authenticateToken, async (req, res) => {
     try {
         const { title, speechData, userId } = req.body;
 
@@ -156,7 +155,7 @@ app.post('/speeches', async (req, res) => {
     }
 });
 
-app.get('/speeches', async (req, res) => {
+app.get('/speeches', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.query; 
         if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -176,6 +175,105 @@ app.get('/speeches', async (req, res) => {
         return res.status(500).json({ message: 'Server error.', error: error.message });
     }
 });
+
+app.get('/speeches/:speechId', authenticateToken, async (req, res) => {
+    try {
+        const { userId } = req.query; 
+        const { speechId } = req.params;
+
+        // Check if both userId and speechId are valid MongoDB Object IDs
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(speechId)) {
+            return res.status(400).json({ message: 'Invalid user ID or speech ID.' });
+        }
+
+        // Convert userId and speechId to MongoDB ObjectId
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const speechObjectId = new mongoose.Types.ObjectId(speechId);
+
+        // Find the speech by speechId
+        const speech = await Speech.findOne({ _id: speechObjectId });
+
+        if (!speech) {
+            return res.status(404).json({ message: 'Speech not found.' });
+        }
+
+        // Check if the speech's user matches the provided userId
+        if (!speech.user.equals(userObjectId)) {
+            return res.status(403).json({ message: 'Access denied. Unauthorized user.' });
+        }
+
+        // Return the speech if userId matches
+        return res.status(200).json(speech);
+    } catch (error) {
+        console.error('Error fetching speech:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+});
+
+app.put('/speeches/:speechId', authenticateToken, async(req, res) => {
+    try {
+        const { speechId  } = req.params;
+        const { title, data, userId } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(speechId)) {
+            return res.status(400).json({ message: 'Invalid user ID or speech ID.' });
+        }
+
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const speechObjectId = new mongoose.Types.ObjectId(speechId);
+
+        const speech = await Speech.findOne({ _id: speechObjectId });
+
+        if (!speech) {
+            return res.status(404).json({ message: 'Speech not found.' });
+        }
+
+        if (!speech.user.equals(userObjectId)) {
+            return res.status(403).json({ message: 'Access denied. Unauthorized user.' });
+        }
+
+        speech.title = title;
+        speech.data = data;
+
+        const updatedSpeech = speech.save();
+        res.status(200).json(updatedSpeech)
+    } catch {
+        console.error('Error updating speech:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+})
+
+app.delete('/speeches/:speechId', authenticateToken, async (req, res) => {
+    try {
+        const { speechId } = req.params;
+        const { userId } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(speechId) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID or speech ID.' });
+        }
+        const speech = await Speech.findById(speechId);
+
+        if (!speech) {
+            return res.status(404).json({ message: 'Speech not found.' });
+        }
+
+        // Check if the user owns the speech
+        if (!speech.user.equals(userId)) {
+            return res.status(403).json({ message: 'Access denied. Unauthorized user.' });
+        }
+
+        // Delete the speech
+        await Speech.deleteOne({ _id: speechId });
+
+        res.status(200).json({ message: 'Speech deleted successfully.' });
+
+    } catch {
+        console.error('Error deleting speech:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+})
+
+
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));

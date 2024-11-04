@@ -7,6 +7,7 @@ import { useAuth, useLogout } from "../hooks/page";
 
 
 export default function Create() {
+    useAuth();
     const router = useRouter();
     const [userId, setUserId] = useState('');
     const [isListening, setIsListening] = useState(false);
@@ -19,14 +20,14 @@ export default function Create() {
     const [speechData, setspeechData] = useState(""); // State to hold speech text
     const [speechTitle, setSpeechTitle] = useState("");
 
-    const isAuthenticated = useAuth();
     const logout = useLogout();
     const [loading, setLoading] = useState(true); // Loading state
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
             const storedUserId = localStorage.getItem('userID');
-            if (storedUserId) {
+            if (storedUserId && token) {
                 setLoading(false);
                 setUserId(storedUserId);
             }else {
@@ -67,10 +68,12 @@ export default function Create() {
                     speechData: speechData,
                     userId: userId
                 };
+                const token = localStorage.getItem('token');
                 const response = await fetch('http://localhost:9000/speeches', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                   },
                   body: JSON.stringify(requestData),
                 });

@@ -5,43 +5,58 @@ import { useState, useEffect } from "react";
 import { useAuth, useLogout} from "../hooks/page";
 import { useRouter } from "next/navigation";
 
+interface Speech {
+  _id: string;
+  title: string;
+}
 
 export default function Dashboard() {
-  const router = useRouter();
   useAuth();
+  const router = useRouter();
   const [userId, setUserId] = useState('');
   const logout = useLogout();
   const [loading, setLoading] = useState(true); // Loading state
 
-  useEffect(() => {
-      if (typeof window !== 'undefined') {
-          const storedUserId = localStorage.getItem('userID');
-          if (storedUserId) {
-              setLoading(false);
-              setUserId(storedUserId);
-          }else {
-              router.push('/login');
-          }
-      }
-  }, [router]);
+  const [userSpeeches, setUserSpeeches] = useState<Speech[]>([]);
 
   // Function to get user speeches
   const getUserSpeeches = async (userId: string) => {
+    const token = localStorage.getItem('token');
     try {
       const response = await fetch(`http://localhost:9000/speeches?userId=${userId}`, {
         method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, 
+          'Content-Type': 'application/json'
+        }
       });
       const data = await response.json();
-      return response.ok && Array.isArray(data.speeches) ? data.speeches : [];
+      return data;
     } catch (error) {
       console.error('Error:', error);
       return []; 
     }
   };
-  
 
-  // Get speeches based on userId
-  const userSpeeches = userId !== null ? getUserSpeeches(userId) : [];
+  useEffect(() => {
+      if (typeof window !== 'undefined') {
+          const token = localStorage.getItem('token');
+          const storedUserId = localStorage.getItem('userID');
+          if (storedUserId && token) {
+              setLoading(false);
+              setUserId(storedUserId);
+              const fetchSpeeches = async () => {
+                const speeches = await getUserSpeeches(storedUserId);
+                setUserSpeeches(speeches);
+                setLoading(false);
+              };
+              fetchSpeeches();
+          }else {
+              router.push('/login');
+          }
+      }
+  }, [router]);  
+
 
   if (loading) {
     return (
@@ -97,13 +112,13 @@ export default function Dashboard() {
         </h2>
         {userSpeeches.length > 0 ? (
           <ul className="speeches space-y-4">
-            {/*userSpeeches.map((speech) => (
-              <Link key={speech.id} href={`/speech/${speech.id}`} className="block">
+            {userSpeeches.map((speech) => (
+              <Link key={speech._id} href={`/speech/${speech._id}`} className="block">
                 <li className="p-3 bg-white rounded-md text-teal-900 hover:bg-teal-100 transition duration-200 ease-in-out shadow-md">
                   {speech.title}
                 </li>
               </Link>
-            ))*/}
+            ))}
           </ul>
         ) : (
           <div className="no_speech block text-sm font-medium text-teal-800 text-center">
