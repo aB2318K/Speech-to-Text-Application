@@ -1,28 +1,77 @@
 'use client'
 import Link from "next/link"
-import { useState } from "react";
-
-// TODO Get actual user info from database
-const user = { firstName: 'First', lastName: 'Last' };
+import { useState, useEffect } from "react";
+import { useAuth, useLogout} from "../hooks/page";
+import { useRouter } from "next/navigation";
 
 export default function Profile() {
+    useAuth();
+    const logout = useLogout();
+    const router = useRouter();
     // Main state variables
-    const [firstName, setFirstName] = useState(user.firstName);
-    const [lastName, setLastName] = useState(user.lastName);
+    const [user, setUser] =  useState({});
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [rePassword, setRePassword] = useState('');
 
     // Temporary state variables for modals
-    const [tempFirstName, setTempFirstName] = useState(firstName);
-    const [tempLastName, setTempLastName] = useState(lastName);
+    const [tempFirstName, setTempFirstName] = useState('');
+    const [tempLastName, setTempLastName] = useState('');
     const [firstNameModalOpened, setFirstNameModalOpened] = useState(false);
     const [lastNameModalOpened, setLastNameModalOpened] = useState(false);
     const [passwordModalOpened, setPasswordModalOpened] = useState(false);
 
     // New state variables for password validation
+    const [currentPasswordError, setCurrentPasswordError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [matchError, setMatchError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+    const [loading, setLoading] = useState(true); // Loading state
+
+    const getUserInfo = async (userId: string) => { 
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`http://localhost:9000/user?userId=${userId}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${token}`, 
+                'Content-Type': 'application/json'
+              }
+            });
+            const data = await response.json();
+            return data;
+        }   catch (error) {
+            console.error('Error:', error);
+            return {}; 
+        }
+    }
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
+            const storedUserId = localStorage.getItem('userID');
+            if (storedUserId && token) {
+              setLoading(false);
+              const fetchUser = async () => {
+                const fetchedUser = await getUserInfo(storedUserId);
+                setUser(fetchedUser);
+                if (fetchedUser) {
+                    setFirstName(fetchedUser.firstname || "");
+                    setLastName(fetchedUser.lastname|| "");
+                    setTempFirstName(firstName || "");
+                    setTempLastName(lastName || "");
+                }
+                setLoading(false);
+              };
+              fetchUser();
+            }else {
+              router.push('/login');
+            }
+        }
+    }, [router]);
 
     const passwordValidator = () => {
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -47,33 +96,103 @@ export default function Profile() {
         }
     };
 
-    const handlePasswordChange = () => {
+    //Password update
+    const handlePasswordChange = async () => {
         const isPasswordValid = passwordValidator();
         const isMatching = passwordMatchValidator();
-        if (isPasswordValid && isMatching) {
-            // Logic to update password in the database goes here
+        setCurrentPasswordError('');
+        // Check password requirements and matching passwords
+        if (isPasswordValid && isMatching && password && newPassword) {
 
-            // Close the modal after successful update
-            setPassword('');  // Clear current password
-            setNewPassword(''); // Clear new password
-            setRePassword(''); // Clear re-entered password
-            setPasswordModalOpened(false);
-            setPasswordModalOpened(false);
+            try {
+                const requestData = {
+                    currentPassword: password,  
+                    newPassword: newPassword,
+                };
+                const token = localStorage.getItem('token');
+                const userId = localStorage.getItem('userID');
+    
+                // Send password update request
+                const response = await fetch(`http://localhost:9000/user/${userId}/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(requestData),
+                });
+    
+                const data = await response.json();
+    
+                // Handle response
+                if (response.ok) {
+                    setSuccessMessage('Password succesfully updated!')
+                    setTimeout(() => {
+                        setSuccessMessage(''); // Clear success message
+                        setPasswordModalOpened(false);  // Close modal
+                        setPassword('');  // Clear current password
+                        setNewPassword(''); // Clear new password
+                        setRePassword(''); // Clear re-entered password
+                    }, 2000);
+                } else {
+                    setNewPassword(''); // Clear new password
+                    setRePassword(''); // Clear re-entered password
+                    if(data.sameMessage) {
+                        setPasswordError(data.sameMessage);
+                    } else {
+                        setCurrentPasswordError(data.message); 
+                    }
+                    
+                }
+    
+            } catch (error) {
+                console.error('Error updating password:', error);
+                setCurrentPasswordError('An error occurred while updating password.');
+            }
         }
-    }
-
+    };
+    
 
     // Handlers for saving changes
-    //ToDO update these functions to actually update the database:
-    const handleFirstNameChange = () => {
-        setFirstName(tempFirstName);
-        setFirstNameModalOpened(false);
-    }
-
-    const handleLastNameChange = () => {
-        setLastName(tempLastName);
-        setLastNameModalOpened(false);
-    }
+    const handleNameChange = async (infoName: string, newValue: string) => {
+        if (newValue) {
+            try {
+                const requestData = {
+                    info: newValue
+                };
+                const token = localStorage.getItem('token');
+                const userId = localStorage.getItem('userID');
+                const response = await fetch(`http://localhost:9000/user/${userId}?infoName=${infoName}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(requestData),
+                });
+    
+                const data = await response.json();
+                if (response.ok) {
+                    console.log(data);
+                    if (infoName === 'firstname') {
+                        setFirstName(newValue);
+                        setFirstNameModalOpened(false);
+                    } else if (infoName === 'lastname') {
+                        setLastName(newValue);
+                        setLastNameModalOpened(false);
+                    }
+                } else {
+                    console.log(data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    };
+    
+    const handleFirstNameChange = () => handleNameChange('firstname', tempFirstName);
+    const handleLastNameChange = () => handleNameChange('lastname', tempLastName);
+    
 
     // Modal for editing first name
     const editFirstNameModal = (
@@ -147,6 +266,14 @@ export default function Profile() {
         </div>
     );
 
+    if (loading) {
+        return (
+          <div className="flex h-screen bg-teal-50 items-center justify-center">
+            <div className="spinner"></div> 
+          </div>
+        ); // Show spinner while checking auth
+      }
+
     // Modal for changing password
     const changePasswordModal = (
         <div className="password_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -164,6 +291,7 @@ export default function Profile() {
                     required
                     className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
+                {currentPasswordError && <p className="mt-1 error_message text-red-700 text-[10px]">{currentPasswordError}</p>}
                 <label htmlFor="new_password" className="block text-sm font-medium text-teal-800 mt-4">
                     New Password:
                 </label>
@@ -176,7 +304,7 @@ export default function Profile() {
                     required
                     className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
-                {passwordError && <p className="error_message text-red-700 text-[10px]">{passwordError}</p>}
+                {passwordError && <p className="mt-1 error_message text-red-700 text-[10px]">{passwordError}</p>}
                 <label htmlFor="re_password" className="block text-sm font-medium text-teal-800 mt-4">
                     Re-enter New Password:
                 </label>
@@ -189,7 +317,8 @@ export default function Profile() {
                     required
                     className="mt-1 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
-                {matchError && <p className="match_error text-red-700 text-[10px]">{matchError}</p>}
+                {matchError && <p className="mt-1 match_error text-red-700 text-[10px]">{matchError}</p>}
+                {successMessage && <p className="success_message bg-teal-100 text-teal-600 text-center mt-4 rounded-md">{successMessage}</p>}
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={() => {
@@ -209,7 +338,7 @@ export default function Profile() {
                         Save
                     </button>
                 </div>
-            </div>
+            </div>        
         </div>
     );
 
@@ -242,7 +371,9 @@ export default function Profile() {
                     </li>
                     <li>
                         <Link href="/login">
-                            <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <button 
+                                onClick={logout}
+                                className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 Log Out
                             </button>
                         </Link>

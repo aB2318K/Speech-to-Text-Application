@@ -253,7 +253,7 @@ export default function Speech() {
           <li>
             <Link href="/login">
               <button 
-                  onClick={logout}
+                onClick={logout}
                 className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                 Log Out
               </button>

@@ -273,7 +273,113 @@ app.delete('/speeches/:speechId', authenticateToken, async (req, res) => {
     }
 })
 
+app.get('/user', authenticateToken, async(req, res) => {
+    try {
+        const { userId } = req.query; 
 
+        // Check if both userId is a valid MongoDB Object IDs
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID.' });
+        }
+
+        // Convert userId and speechId to MongoDB ObjectId
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        // Find the speech by speechId
+        const user = await User.findById(userObjectId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Return the speech if userId matches
+        return res.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+})
+
+app.put('/user/:userId', authenticateToken, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { infoName } = req.query;
+        const { info } = req.body;
+
+        // Validate the user ID
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID.' });
+        }
+
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        // Find the user by ID
+        const user = await User.findById(userObjectId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Update the field based on `infoName`
+        if (infoName === 'firstname') {
+            user.firstname = info;
+        } else if (infoName === 'lastname') {
+            user.lastname = info;
+        } else {
+            return res.status(400).json({ message: 'Invalid info name.' });
+        }
+
+        // Save the updated user
+        const updatedUser = await user.save();
+        res.status(200).json(updatedUser);
+
+    } catch (error) {
+        console.error('Error updating User Information:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+});
+
+app.put('/user/:userId/password', authenticateToken, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { currentPassword, newPassword } = req.body;
+
+        // Validate the user ID
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID.' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if current password is correct
+        const isPasswordValid = await comparePasswords(currentPassword, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: '*Invalid password.' });
+        }
+
+        // Check if new password is different from the current password
+        const isSamePassword = await comparePasswords(newPassword, user.password);
+        if (isSamePassword) {
+            return res.status(400).json({ sameMessage: '*New password must be different from the current password.' });
+        }
+
+        // Hash the new password and update
+        const hashedPassword = await hashPassword(newPassword);
+        user.password = hashedPassword;
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({ message: 'Password updated successfully.' });
+    } catch (error) {
+        console.error('Error updating password:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+});
+ 
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
