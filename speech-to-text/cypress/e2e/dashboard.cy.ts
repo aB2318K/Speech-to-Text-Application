@@ -17,7 +17,7 @@ describe('Dashboard Page Test', () => {
   
 
     /*
-    //This is assuming the logged in user has saved three speeches. 
+    //This is assuming the logged in user has saved three speeches. //
     it('Should display saved speeches for user', () => {
       cy.get('h2').should('contain', 'Saved Speeches');
       cy.get('.speeches').within(() => {
