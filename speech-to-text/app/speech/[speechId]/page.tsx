@@ -24,8 +24,8 @@ export default function Speech() {
   const [editableData, setEditableData] = useState("");
   const [delModalOpened, setDelModalOpened] = useState(false);
   const [exportModalOpened, setExportModalOpened] = useState(false);
-  const isTitleChanged = editableTitle !== speechTitle;
-  const isDataChanged = editableData !== speechData;
+  const isTitleChanged = editableTitle.trim() !== speechTitle.trim();
+  const isDataChanged = editableData.trim() !== speechData.trim();
   const isDataEmpty = editableData.trim().length === 0;
   const isTitleEmpty = editableTitle.trim().length === 0;
 
@@ -78,8 +78,8 @@ export default function Speech() {
     if (editableTitle.trim() && editableData.trim()) {
       try {
           const requestData = {
-              title: editableTitle,
-              data: editableData,
+              title: editableTitle.trim(),
+              data: editableData.trim(),
               userId: userId
           };
           const token = localStorage.getItem('token');
@@ -125,7 +125,7 @@ export default function Speech() {
         if (response.ok) {
             console.log('Speech deleted successfully');
             setDelModalOpened(false); // Close the delete modal
-            router.push('/dashboard'); // Redirect to dashboard or wherever you want
+            router.push('/dashboard'); // Redirect to dashboard 
         } else {
             const data = await response.json();
             console.error(data.message);
@@ -272,7 +272,7 @@ export default function Speech() {
           type="text"
           placeholder="Enter title"
           value={editableTitle}
-          onChange={(e) => setEditableTitle(e.target.value)}
+          onChange={(e) => setEditableTitle(e.target.value.replace(/\s+/g, ' '))}
           className="mb-5 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
         />
         <textarea
@@ -280,7 +280,7 @@ export default function Speech() {
           name="speech"
           rows={12}
           value={editableData}
-          onChange={(e) => setEditableData(e.target.value)}
+          onChange={(e) => setEditableData(e.target.value.replace(/\s+/g, ' '))}
           className="w-full p-2 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
         />
         <div className="flex justify-evenly mt-5">

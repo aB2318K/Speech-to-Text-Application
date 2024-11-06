@@ -10,6 +10,7 @@ export default function Profile() {
     const router = useRouter();
     // Main state variables
     const [user, setUser] =  useState({});
+    const [userId, setUserId] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
@@ -19,15 +20,18 @@ export default function Profile() {
     // Temporary state variables for modals
     const [tempFirstName, setTempFirstName] = useState('');
     const [tempLastName, setTempLastName] = useState('');
+
     const [firstNameModalOpened, setFirstNameModalOpened] = useState(false);
     const [lastNameModalOpened, setLastNameModalOpened] = useState(false);
     const [passwordModalOpened, setPasswordModalOpened] = useState(false);
+    const [deleteModalOpened, setDeleteModalOpened] = useState(false);
 
     // New state variables for password validation
     const [currentPasswordError, setCurrentPasswordError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [matchError, setMatchError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [deletMessage, setDeleteMessage] = useState('');
 
     const [loading, setLoading] = useState(true); // Loading state
 
@@ -58,6 +62,7 @@ export default function Profile() {
               const fetchUser = async () => {
                 const fetchedUser = await getUserInfo(storedUserId);
                 setUser(fetchedUser);
+                setUserId(storedUserId);
                 if (fetchedUser) {
                     setFirstName(fetchedUser.firstname || "");
                     setLastName(fetchedUser.lastname|| "");
@@ -155,7 +160,8 @@ export default function Profile() {
 
     // Handlers for saving changes
     const handleNameChange = async (infoName: string, newValue: string) => {
-        if (newValue) {
+        const isNameChanged = infoName === 'firstname' ? newValue.trim() !== firstName : newValue.trim() !== lastName;
+        if (newValue && isNameChanged) {         
             try {
                 const requestData = {
                     info: newValue
@@ -190,8 +196,39 @@ export default function Profile() {
         }
     };
     
-    const handleFirstNameChange = () => handleNameChange('firstname', tempFirstName);
-    const handleLastNameChange = () => handleNameChange('lastname', tempLastName);
+    const handleFirstNameChange = () => handleNameChange('firstname', tempFirstName.trim());
+    const handleLastNameChange = () => handleNameChange('lastname', tempLastName.trim());
+
+    //Handle delete
+    const handleDelete = async () => {
+        const token = localStorage.getItem('token');
+        const requestData = {
+            userId: userId, 
+        };
+        try {
+            const response = await fetch(`http://localhost:9000/user`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(requestData),
+            });
+    
+            if (response.ok) {
+                setDeleteMessage('Your account has been deleted successfully!')
+                setTimeout(() => {
+                    setDeleteModalOpened(false); // Close the delete modal
+                    router.push('/login');
+                }, 2000)
+            } else {
+                const data = await response.json();
+                console.error(data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting speech:', error);
+        }
+    };
     
 
     // Modal for editing first name
@@ -205,7 +242,7 @@ export default function Profile() {
                     type="text"
                     id="first_name"
                     value={tempFirstName}
-                    onChange={(e) => setTempFirstName(e.target.value)} 
+                    onChange={(e) => setTempFirstName(e.target.value.replace(/\s+/g, ' '))} 
                     placeholder="Enter your first name"
                     maxLength={50}
                     required
@@ -241,7 +278,7 @@ export default function Profile() {
                     type="text"
                     id="last_name"
                     value={tempLastName}
-                    onChange={(e) => setTempLastName(e.target.value)} 
+                    onChange={(e) => setTempLastName(e.target.value.replace(/\s+/g, ' '))} 
                     placeholder="Enter your last name"
                     maxLength={50}
                     required
@@ -342,6 +379,30 @@ export default function Profile() {
         </div>
     );
 
+    const deleteModal = (
+        <div className="delete_modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-5 rounded-lg shadow-xl w-1/3">
+            <h3 className="text-teal-1000 text-lg mb-4">Are you sure you want to delete your account? 
+                This action is permanent, and all of your data will be lost. Please confirm if you wish to proceed.</h3>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setDeleteModalOpened(false)}
+                className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="confirm_delete bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              >
+                Confirm
+              </button>
+            </div>
+            {deletMessage && <p className="success_message bg-teal-100 text-teal-600 text-center mt-4 rounded-md">{deletMessage}</p>}
+          </div>
+        </div>
+    );
+
     return (
         <div className="flex h-screen bg-teal-50">
             {/* Sidebar */}
@@ -406,17 +467,26 @@ export default function Profile() {
                                 Edit
                             </button>
                         </li>
-                        <li className="flex justify-center">
-                            <button onClick={() => setPasswordModalOpened(true)} className="py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                Change Password
-                            </button>
-                        </li>
+                        <div className="flex space-x-4 justify-center">
+                            <li>
+                                <button onClick={() => setPasswordModalOpened(true)} className="py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    Change Password
+                                </button>
+                            </li>
+                            <li>
+                                <button onClick={() => setDeleteModalOpened(true)} className="py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    Delete Account
+                                </button>
+                            </li>
+                        </div>
+                        
                     </ul>
                 </div>
             </div>
             {firstNameModalOpened && editFirstNameModal}
             {lastNameModalOpened && editLastNameModal}
             {passwordModalOpened && changePasswordModal}
+            {deleteModalOpened && deleteModal}
         </div>
     );
 }

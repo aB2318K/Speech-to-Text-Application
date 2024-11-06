@@ -121,15 +121,6 @@ app.post('/signup', signUpUser);
 
 app.post('/login', loginUser);
 
-
-/*
-app.get('/logout', (req, res) => {
-    //clear the cookies i.e. the token
-    res.clearCookie('token');
-    res.json({message: 'Logout successfully'});
-})
-*/
-
 app.post('/speeches', authenticateToken, async (req, res) => {
     try {
         const { title, speechData, userId } = req.body;
@@ -379,6 +370,33 @@ app.put('/user/:userId/password', authenticateToken, async (req, res) => {
         return res.status(500).json({ message: 'Server error.', error: error.message });
     }
 });
+
+app.delete('/user', authenticateToken, async(req, res) => {
+    try {
+        const { userId } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID or speech ID.' });
+        }
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        //Delete all the speeches associated with the user
+        await Speech.deleteMany({ user: userId });
+
+        // Delete the usr+er
+        await User.deleteOne({ _id: userId });
+
+        res.status(200).json({ message: 'User deleted successfully.' });
+
+    } catch {
+        console.error('Error deleting speech:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+})
  
 
 const PORT = process.env.PORT || 9000;

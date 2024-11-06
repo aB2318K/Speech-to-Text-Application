@@ -64,8 +64,8 @@ export default function Create() {
         if (speechTitle && speechData) {
             try {
                 const requestData = {
-                    title: speechTitle,
-                    speechData: speechData,
+                    title: speechTitle.trim(),
+                    speechData: speechData.trim(),
                     userId: userId
                 };
                 const token = localStorage.getItem('token');
@@ -146,7 +146,7 @@ export default function Create() {
                     type="text"
                     id="title"
                     value={speechTitle}
-                    onChange={(e) => setSpeechTitle(e.target.value)}
+                    onChange={(e) => setSpeechTitle(e.target.value.replace(/\s+/g, ' '))}
                     name="title"
                     placeholder="Enter title"
                     className="mb-4 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
@@ -252,7 +252,7 @@ export default function Create() {
                     name="speech"
                     rows={12}
                     value={speechData} // Bind the value to state
-                    onChange={(e) => setspeechData(e.target.value)} // Update state on change
+                    onChange={(e) => setspeechData(e.target.value.replace(/\s+/g, ' '))} // Update state on change
                     className="w-full p-2 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
                 <div className="flex justify-evenly">

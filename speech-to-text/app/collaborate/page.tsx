@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAuth, useLogout } from "../hooks/page";
 
 //This is just an example of invited users
 //You have to write the logic to invite users in real time to collaborate
 const invitedUsers = ['User2', 'User3'];
 
 export default function Collaborate() {
+    useAuth();
     const router = useRouter();
     const [isListening, setIsListening] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
@@ -26,8 +28,23 @@ export default function Collaborate() {
     const [iniviteeEmail, setIniviteeEmail] = useState('');
     const [successInviteMessage, setSuccessInviteMessage] = useState('');
     const [emailError, setEmailError] = useState('');
-    const params = useParams();
-    const userId = parseInt(params.userId as string); // Convert userId to a number
+    const [userId, setUserId] = useState('');
+
+    const logout = useLogout();
+    const [loading, setLoading] = useState(true); // Loading state
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
+            const storedUserId = localStorage.getItem('userID');
+            if (storedUserId && token) {
+                setLoading(false);
+                setUserId(storedUserId);
+            }else {
+                router.push('/login');
+            }
+        }
+    }, [router]);;
 
     // Toggle the listening state
     const handleMicrophoneClick = () => {
@@ -54,10 +71,38 @@ export default function Collaborate() {
         window.location.reload();
     }
 
-    const handleSave = () => {
-        // Later write the logic to save in the database         
+    const handleSave = async () => {
+        if (speechTitle && speechData) {
+            try {
+                const requestData = {
+                    title: speechTitle.trim(),
+                    speechData: speechData.trim(),
+                    userId: userId
+                };
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:9000/speeches', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  },
+                  body: JSON.stringify(requestData),
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    console.log(data);
+                    
+                } else {
+                    console.log(data)
+                }
+              } catch (error) {
+                console.error('Error:', error);
+              }
+        }
+
         setSaveModalOpened(false);
-        router.push('/dashboard/[id]');
+        router.push('/dashboard');
         setSpeechTitle("");   
     }
 
@@ -149,7 +194,7 @@ export default function Collaborate() {
                     type="text"
                     id="title"
                     value={speechTitle}
-                    onChange={(e) => setSpeechTitle(e.target.value)}
+                    onChange={(e) => setSpeechTitle(e.target.value.replace(/\s+/g, ' '))}
                     name="title"
                     placeholder="Enter title"
                     className="mb-4 w-full px-4 py-3 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
@@ -251,6 +296,14 @@ export default function Collaborate() {
         </div>
     );
 
+    if (loading) {
+        return (
+          <div className="flex h-screen bg-teal-50 items-center justify-center">
+            <div className="spinner"></div> 
+          </div>
+        ); // Show spinner while checking auth
+    }
+
     return (
         <div className="flex h-screen bg-teal-50">
             {/* Sidebar */}
@@ -280,7 +333,9 @@ export default function Collaborate() {
                     </li>
                     <li>
                         <Link href="/login">
-                            <button className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <button 
+                                onClick={logout}
+                                className="w-full py-2 px-4 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                 Log Out
                             </button>
                         </Link>
@@ -297,7 +352,7 @@ export default function Collaborate() {
                     name="speech"
                     rows={12}
                     value={speechData} // Bind the value to state
-                    onChange={(e) => setspeechData(e.target.value)} // Update state on change
+                    onChange={(e) => setspeechData(e.target.value.replace(/\s+/g, ' '))} // Update state on change
                     className="w-full p-2 border border-teal-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
                 <div className="flex justify-evenly">
