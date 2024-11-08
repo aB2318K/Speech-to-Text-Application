@@ -19,18 +19,27 @@ export default function Reset() {
         }
     };
 
-    const handleClick = (event: React.MouseEvent) => {
+    const handleClick = async (event: React.MouseEvent) => {
         event.preventDefault();
         setSuccessMessage('');
         const isEmailValid = emailValidator();
         if(isEmailValid) {
-            /* if (email not found in database) {
-                setErrorMessage('*No account registered with this email')
-            } else {
-                handle logic to send the reset link to the user's email
-             }
-                */
-            setSuccessMessage('A password reset link has been sent to your email'); 
+            try {
+                const response = await fetch(`http://localhost:9000/reset?email=${email}`, {
+                  method: 'GET',
+                  headers: { 
+                    'Content-Type': 'application/json'
+                  }
+                });
+                if(response.ok) {
+                    setSuccessMessage('A password reset link has been sent to your email');
+                } else {
+                    setEmailError('*Email not found. Please check for typos or create a new account.')
+                }
+
+              } catch (error) {
+                console.error('Error:', error);
+              } 
         } 
     }
 

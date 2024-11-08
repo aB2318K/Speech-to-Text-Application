@@ -50,7 +50,7 @@ Cypress.Commands.add('login', () => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            email: 'baralansh8@gmail.com',
+            email: 'testEmail@example.com',
             password: 'testPassword123!'
         })
     })

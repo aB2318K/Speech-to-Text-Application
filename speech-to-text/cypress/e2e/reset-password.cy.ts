@@ -12,9 +12,15 @@ describe('reset_page_test', () => {
         cy.get('.error_message').should('be.visible').and('contain', '*Please provide a valid email address in the format: example@domain.com');
     })
 
+    it('Should not let users submit email not in database', () => {
+        cy.get('input[type="email"]').type('validEmail@example.com');
+        cy.get('button[type="button"]').click();
+        cy.get('.error_message').should('be.visible').and('contain', '*Email not found. Please check for typos or create a new account.');
+    })
+
     //Success message should only appear when the given email exists in the data base and the reset link has been sent.
     it('Should display success message when correct email is provided', () => {
-        cy.get('input[type="email"]').type('validEmail@example.com');
+        cy.get('input[type="email"]').type('testEmail@example.com');
         cy.get('button[type="button"]').click();
         cy.get('.success_message').should('be.visible').and('contain', 'A password reset link has been sent to your email');
     })

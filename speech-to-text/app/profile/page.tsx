@@ -216,6 +216,8 @@ export default function Profile() {
             });
     
             if (response.ok) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("userID");
                 setDeleteMessage('Your account has been deleted successfully!')
                 setTimeout(() => {
                     setDeleteModalOpened(false); // Close the delete modal

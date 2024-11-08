@@ -121,6 +121,8 @@ app.post('/signup', signUpUser);
 
 app.post('/login', loginUser);
 
+
+//Create new speech
 app.post('/speeches', authenticateToken, async (req, res) => {
     try {
         const { title, speechData, userId } = req.body;
@@ -146,6 +148,7 @@ app.post('/speeches', authenticateToken, async (req, res) => {
     }
 });
 
+//Retrieve all user speeches
 app.get('/speeches', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.query; 
@@ -167,6 +170,7 @@ app.get('/speeches', authenticateToken, async (req, res) => {
     }
 });
 
+//Retrieve speech by speech ID
 app.get('/speeches/:speechId', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.query; 
@@ -201,6 +205,7 @@ app.get('/speeches/:speechId', authenticateToken, async (req, res) => {
     }
 });
 
+//Edit speech by speech ID
 app.put('/speeches/:speechId', authenticateToken, async(req, res) => {
     try {
         const { speechId  } = req.params;
@@ -234,6 +239,7 @@ app.put('/speeches/:speechId', authenticateToken, async(req, res) => {
     }
 })
 
+//Delete speech by speech ID
 app.delete('/speeches/:speechId', authenticateToken, async (req, res) => {
     try {
         const { speechId } = req.params;
@@ -264,6 +270,7 @@ app.delete('/speeches/:speechId', authenticateToken, async (req, res) => {
     }
 })
 
+//Get logged in User information
 app.get('/user', authenticateToken, async(req, res) => {
     try {
         const { userId } = req.query; 
@@ -291,6 +298,7 @@ app.get('/user', authenticateToken, async(req, res) => {
     }
 })
 
+//Edit user information
 app.put('/user/:userId', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
@@ -330,6 +338,7 @@ app.put('/user/:userId', authenticateToken, async (req, res) => {
     }
 });
 
+//Change user password from profile page
 app.put('/user/:userId/password', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
@@ -371,6 +380,7 @@ app.put('/user/:userId/password', authenticateToken, async (req, res) => {
     }
 });
 
+//Delete user by user ID
 app.delete('/user', authenticateToken, async(req, res) => {
     try {
         const { userId } = req.body;
@@ -387,7 +397,7 @@ app.delete('/user', authenticateToken, async(req, res) => {
         //Delete all the speeches associated with the user
         await Speech.deleteMany({ user: userId });
 
-        // Delete the usr+er
+        // Delete the user
         await User.deleteOne({ _id: userId });
 
         res.status(200).json({ message: 'User deleted successfully.' });
@@ -395,6 +405,21 @@ app.delete('/user', authenticateToken, async(req, res) => {
     } catch {
         console.error('Error deleting speech:', error);
         return res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+})
+
+app.get('/reset', async(req, res) => {
+    const { email } = req.query;
+    try {
+        const existingUser = await User.findOne({ email });
+
+        if (!existingUser) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        return res.status(200).json({ message: 'Password reset email sent.' });
+    } catch (error) {
+        console.log('Error finding user:', error);
+        return res.status(500).json({ message: 'Server error.', error: error.message })
     }
 })
  
