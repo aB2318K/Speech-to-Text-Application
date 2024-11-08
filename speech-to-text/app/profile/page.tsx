@@ -367,6 +367,7 @@ export default function Profile() {
                             setRePassword('');
                             setPasswordError('');
                             setMatchError('');
+                            setCurrentPasswordError('');
                         }}
                         className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 mr-2">
                         Cancel
