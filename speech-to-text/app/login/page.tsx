@@ -129,17 +129,17 @@ export default function LogIn() {
                         Log In
                     </button>
                 </form>
-                <div className="text-center mt-4">
+                {!successMessage && <div className="text-center mt-4">
                     <Link href="/reset-password" className="text-sm text-teal-600 hover:underline">
                         Forgotten Password?
                     </Link>
-                </div>
-                <p className="mt-4 text-center text-sm text-teal-800">
+                </div>}
+                {!successMessage && <p className="mt-4 text-center text-sm text-teal-800">
                     Don&apos;t have an account?{" "}
                     <Link href="/signup" className="text-teal-600 hover:underline">
                         Register here
                     </Link>
-                </p>
+                </p>}
                 {successMessage && <p className="success_message bg-teal-100 text-teal-600 text-center mt-4 rounded-md">{successMessage}</p>}
             </div>
         </div>
